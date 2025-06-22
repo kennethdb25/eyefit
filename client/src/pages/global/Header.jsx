@@ -1,0 +1,50 @@
+import React, { useContext, useState } from "react";
+import {
+  BsFillBellFill,
+  BsFillEnvelopeFill,
+  BsPersonCircle,
+  BsSearch,
+  BsJustify,
+} from "react-icons/bs";
+import "../../index.css";
+import { LoginContext } from "../../context/LoginContext";
+import UserProfileModal from "./UserProfileModal/UserProfileModal";
+
+function Header({ OpenSidebar }) {
+  const { loginData, setLoginData } = useContext(LoginContext);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const user = {
+    name: `${loginData?.body.firstName} ${loginData?.body.lastName}`,
+    contact: loginData?.body.contact,
+    email: loginData?.body.email,
+    address: loginData?.body.address,
+    user: loginData?.body?.userType,
+    acctStatus: loginData?.body.acctStatus,
+  };
+  return (
+    <header className="headers">
+      <div className="menu-icon">
+        <BsJustify className="icon" onClick={OpenSidebar} />
+      </div>
+      <div className="header-left">
+        <BsSearch className="icon" />
+      </div>
+      <div className="header-right">
+        <BsFillBellFill className="icon" />
+        <BsFillEnvelopeFill className="icon" />
+        <BsPersonCircle
+          className="icon"
+          onClick={() => setIsModalVisible(true)}
+        />
+      </div>
+      <UserProfileModal
+        user={user}
+        isVisible={isModalVisible}
+        onClose={() => setIsModalVisible(false)}
+      />
+    </header>
+  );
+}
+
+export default Header;
