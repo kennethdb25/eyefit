@@ -6,10 +6,11 @@ import Home from "./pages/dashboard";
 import DashboardLayout from "./pages/global/DashboardLayout";
 import Products from "./pages/products";
 import Appointments from "./pages/appointments";
-import Customers from "./pages/customers";
+import Orders from "./pages/orders";
 import Inventory from "./pages/inventory";
 import Reports from "./pages/reports";
 import Setting from "./pages/setting";
+import Delivery from "./pages/delivery";
 
 function App() {
   // eslint-disable-next-line no-unused-vars
@@ -25,7 +26,7 @@ function App() {
   const LoginValidation = async () => {
     if (localStorage.getItem("accountToken")) {
       let validToken = localStorage.getItem("accountToken");
-      const data = await fetch("/api/validate", {
+      const data = await fetch("/api/user/validate", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -111,13 +112,28 @@ function App() {
       {loginData && (
         <>
           <Route
-            path="/customers"
+            path="/order"
             element={
               <DashboardLayout
                 OpenSidebar={OpenSidebar}
                 openSidebarToggle={openSidebarToggle}
               >
-                <Customers />
+                <Orders />
+              </DashboardLayout>
+            }
+          />
+        </>
+      )}
+      {loginData && (
+        <>
+          <Route
+            path="/delivery"
+            element={
+              <DashboardLayout
+                OpenSidebar={OpenSidebar}
+                openSidebarToggle={openSidebarToggle}
+              >
+                <Delivery />
               </DashboardLayout>
             }
           />

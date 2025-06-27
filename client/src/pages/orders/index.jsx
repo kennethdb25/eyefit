@@ -1,13 +1,13 @@
 import React from "react";
 
-const Customers = () => {
+const Orders = () => {
   return (
     <main className="main-container">
       <div className="main-title">
-        <h3>CUSTOMERS</h3>
+        <h3>ORDERS</h3>
       </div>
     </main>
   );
 };
 
-export default Customers;
+export default Orders;

@@ -13,7 +13,7 @@ const AccountLogin = (props) => {
   const { LoginValidation } = props;
 
   const onFinish = async (values) => {
-    const data = await fetch("/api/registration", {
+    const data = await fetch("/api/user/registration", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

@@ -36,7 +36,7 @@ const LoginForm = (props) => {
   };
 
   const onFinish = async (values) => {
-    const data = await fetch("/api/login", {
+    const data = await fetch("/api/user/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

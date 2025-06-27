@@ -11,21 +11,24 @@ const {
 const ValidateAccount = require("../middlewares/Authenticate");
 
 // LOGIN AND VALIDATE //
-UserRouter.post("/api/login", AccountLogin);
-UserRouter.get("/api/validate", ValidateAccount, AccountValidate);
+UserRouter.post("/api/user/login", AccountLogin);
+UserRouter.get("/api/user/validate", ValidateAccount, AccountValidate);
 // --------------- **** -------------- //
 
 // LOGOUT//
-UserRouter.get("/api/logout", ValidateAccount, AccountLogout);
+UserRouter.get("/api/user/logout", ValidateAccount, AccountLogout);
 // --------------- **** -------------- //
 
 // SIGN UP //
-UserRouter.post("/api/registration", AccountSignup);
+UserRouter.post("/api/user/registration", AccountSignup);
 // --------------- **** -------------- //
 
 // FORGOT PASSWORD //
-UserRouter.get("/api/forgot-password/:email", ForgotPasswordVerifyEmail);
-UserRouter.patch("/api/forgot-password/:email", ForgotPasswordUpdatePassword);
+UserRouter.get("/api/user/forgot-password/:email", ForgotPasswordVerifyEmail);
+UserRouter.patch(
+  "/api/user/forgot-password/:email",
+  ForgotPasswordUpdatePassword
+);
 // --------------- **** -------------- //
 
 module.exports = UserRouter;

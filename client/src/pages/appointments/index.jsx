@@ -75,11 +75,11 @@ const Appointments = () => {
       dataIndex: "date",
       key: "date",
     },
-    {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-    },
+    // {
+    //   title: "Price",
+    //   dataIndex: "price",
+    //   key: "price",
+    // },
     {
       title: "Status",
       dataIndex: "status",

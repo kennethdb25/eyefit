@@ -9,6 +9,7 @@ import {
   BsListCheck,
   BsMenuButtonWideFill,
   BsFillGearFill,
+  BsTruck,
 } from "react-icons/bs";
 
 function Sidebar({ openSidebarToggle, OpenSidebar }) {
@@ -61,10 +62,18 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         <li
           className="sidebar-list-item"
           onClick={() => {
-            onNavigate("/customers");
+            onNavigate("/order");
           }}
         >
-          <BsPeopleFill className="icon" /> Customers
+          <BsPeopleFill className="icon" /> Orders
+        </li>
+        <li
+          className="sidebar-list-item"
+          onClick={() => {
+            onNavigate("/delivery");
+          }}
+        >
+          <BsTruck className="icon" /> Delivery
         </li>
         <li
           className="sidebar-list-item"

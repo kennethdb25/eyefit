@@ -202,11 +202,30 @@ code {
   font-weight: bold !important;
 }
 
+.ant-empty-description {
+  color: white !important;
+}
+
 /* buttons */
 .action-buttons {
   display: flex;
   flex-direction: row;
   gap: 10px;
+}
+
+.add-button {
+  background-color: #3c2fee; /* green */
+  color: white;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-button:hover {
+  background-color: #040675;
 }
 
 .edit-button {
