@@ -2,6 +2,7 @@ body {
   margin: 0;
   padding: 0;
   background-color: #1d2634;
+  /* background-color: #b8d8c1; */
   color: #9e9ea4;
   font-family: "Montserrat", sans-serif;
   height: 100vh;
@@ -203,6 +204,20 @@ code {
 }
 
 .ant-empty-description {
+  color: white !important;
+}
+
+.transparent-spin {
+  background: transparent !important;
+  color: white;
+}
+
+.transparent-spin .ant-spin-dot-item {
+  background-color: #1890ff; /* or your preferred spinner color */
+  color: white;
+}
+
+.ant-pagination-item-link {
   color: white !important;
 }
 

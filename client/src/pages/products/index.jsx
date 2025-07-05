@@ -1,49 +1,65 @@
-import React, { useState } from "react";
-import { Table, Tag, message } from "antd";
-import "antd/dist/reset.css"; //
+import React, { useState, useContext } from "react";
+import { Form, Table, Tag, message, Button, Popconfirm } from "antd";
+import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import AddProductModal from "../components/AddProductModal";
+import { useEffect } from "react";
+import { LoginContext } from "../../context/LoginContext";
 
 const Products = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [editingRecord, setEditingRecord] = useState(null);
+  const [fileList, setFileList] = useState([]);
+  const [productData, setProductData] = useState([]);
 
-  const dataSource = [
-    {
-      key: "1",
-      productName: "Stylish Eyeglasses",
-      brand: "Hammer",
-      model: "XS20S",
-      stock: 20,
-      price: "Php 2,999.00",
-      status: "In Stock",
-    },
-    {
-      key: "2",
-      productName: "Indoor Sun Glasses",
-      brand: "Crocs",
-      model: "JK920A",
-      stock: "9",
-      price: "Php 1,999.00",
-      status: "In Stock",
-    },
-    {
-      key: "3",
-      productName: "Indoor Sun Glasses",
-      brand: "Nike",
-      model: "NK220C",
-      stock: "0",
-      price: "Php 2,999.00",
-      status: "Out of Stock",
-    },
-    {
-      key: "4",
-      productName: "Women Sun Glasses",
-      brand: "Fly",
-      model: "KJ2124H",
-      stock: "0",
-      price: "Php 999.00",
-      status: "Discontinued",
-    },
-  ];
+  const { loginData, setLoginData } = useContext(LoginContext);
+
+  const fetchData = async () => {
+    setLoading(true); // Start loading
+    try {
+      const res = await fetch(
+        `/api/product?company=${loginData?.body?.company}`
+      );
+      const json = await res.json();
+      setData(json.body || []); // assuming your API responds with { body: [...] }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const showAddModal = () => {
+    form.resetFields();
+    setIsEdit(false);
+    setIsModalVisible(true);
+  };
+
+  const showEditModal = (record) => {
+    form.setFieldsValue(record);
+    setEditingRecord(record);
+    setIsEdit(true);
+    setIsModalVisible(true);
+  };
+
+  const onClose = () => {
+    setEditingRecord();
+    setIsEdit(false);
+    setIsModalVisible(false);
+    setFileList([]);
+  };
+
+  const confirm = (e) => {
+    console.log(e);
+    message.success("Click on Yes");
+  };
+  const cancel = (e) => {
+    console.log(e);
+    message.error("Click on No");
+  };
 
   const columns = [
     {
@@ -64,13 +80,14 @@ const Products = () => {
     },
     {
       title: "Stocks",
-      dataIndex: "stock",
-      key: "stock",
+      dataIndex: "stocks",
+      key: "stocks",
     },
     {
       title: "Price",
       dataIndex: "price",
       key: "price",
+      render: (_, { price }) => <>{`Php ${price}.00`}</>,
     },
     {
       title: "Status",
@@ -89,12 +106,16 @@ const Products = () => {
       ),
       filters: [
         {
-          text: "Available",
-          value: "Available",
+          text: "In Stock",
+          value: "In Stock",
         },
         {
           text: "Out of Stock",
-          value: "Out of Stocke",
+          value: "Out of Stock",
+        },
+        {
+          text: "Discontinued",
+          value: "Discontinued",
         },
       ],
       onFilter: (value, record) => record.status.indexOf(value) === 0,
@@ -104,32 +125,49 @@ const Products = () => {
     {
       title: "Action",
       key: "action",
-      render: () => (
+      render: (_, record) => (
         <>
           <div className="action-buttons">
-            <button className="edit-button">EDIT</button>
-            <button className="delete-button">DELETE</button>
+            <button
+              className="edit-button"
+              onClick={() => showEditModal(record)}
+            >
+              EDIT
+            </button>
+            <Popconfirm
+              title="Delete Product"
+              description="Are you sure to delete this product?"
+              onConfirm={() => confirm()}
+              onCancel={() => cancel()}
+              okText="Yes"
+              cancelText="No"
+            >
+              <button className="delete-button">DELETE</button>
+            </Popconfirm>
           </div>
         </>
       ),
     },
   ];
 
-  const inStockCount = dataSource.filter(
-    (item) => item.status === "In Stock"
-  ).length;
-  const outOfStockCount = dataSource.filter(
+  const inStockCount = data.filter((item) => item.status === "In Stock").length;
+  const outOfStockCount = data.filter(
     (item) => item.status === "Out of Stock"
   ).length;
-  const discontinuedCount = dataSource.filter(
+  const discontinuedCount = data.filter(
     (item) => item.status === "Discontinued"
   ).length;
 
-  const handleAddProduct = (product) => {
-    console.log("New Product:", product);
-    message.success("Product added successfully!");
+  const onConfirm = () => {
+    // console.log("New Product:", product);
+    // message.success("Product added successfully!");
+    form.submit();
     // You can now POST to your backend or update state
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <main className="main-container">
@@ -181,25 +219,48 @@ const Products = () => {
               <strong>Discontinued: {discontinuedCount}</strong>
             </div>
           </div>
-          <div>
-            <button
-              className="add-button"
-              onClick={() => setIsModalVisible(true)}
+          <div className="action-buttons">
+            <Button
+              icon={<PlusOutlined style={{ fontSize: "16px" }} />}
+              onClick={() => showAddModal()}
+              type="primary"
+              style={{ marginBottom: 16 }}
             >
-              ➕ <strong>Add Product</strong>
-            </button>
+              Add Product
+            </Button>
+            <Button
+              icon={<ReloadOutlined style={{ fontSize: "16px" }} />}
+              onClick={fetchData}
+              loading={loading}
+              type="default"
+              style={{ marginBottom: 16 }}
+            >
+              Refresh Data
+            </Button>
           </div>
         </div>
       </div>
       <div className="main-content">
-        <Table dataSource={dataSource} columns={columns} />
+        <Table
+          dataSource={data}
+          columns={columns}
+          loading={loading}
+          rowKey="_id"
+        />
       </div>
 
       {/* Add Product Modal */}
       <AddProductModal
         visible={isModalVisible}
-        onClose={() => setIsModalVisible(false)}
-        onAdd={handleAddProduct}
+        onClose={onClose}
+        onConfirm={onConfirm}
+        form={form}
+        fetchData={fetchData} // Pass the fetchData function to the modal for re}
+        isEdit={isEdit}
+        editingRecord={editingRecord}
+        setIsModalVisible={setIsModalVisible}
+        fileList={fileList}
+        setFileList={setFileList}
       />
     </main>
   );

@@ -92,7 +92,9 @@ const AccountSignup = async (req, res) => {
   try {
     const validate = await AccountModel.findOne({ email });
 
-    if (validate) {
+    const validateCompany = await AccountModel.findOne({ company });
+
+    if (validate || validateCompany) {
       return res.status(422).json({ error: "Account Already Exists" });
     }
 

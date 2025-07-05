@@ -1,21 +1,21 @@
+/* eslint-disable no-unused-vars */
 import React, { useContext, useState } from "react";
 import {
   BsFillBellFill,
   BsFillEnvelopeFill,
   BsPersonCircle,
-  BsSearch,
   BsJustify,
 } from "react-icons/bs";
 import "../../index.css";
 import { LoginContext } from "../../context/LoginContext";
 import UserProfileModal from "./UserProfileModal/UserProfileModal";
 
-function Header({ OpenSidebar }) {
+function Header({ OpenSidebar, setData }) {
   const { loginData, setLoginData } = useContext(LoginContext);
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const user = {
-    name: `${loginData?.body.firstName} ${loginData?.body.lastName}`,
+    name: loginData?.body.company,
     contact: loginData?.body.contact,
     email: loginData?.body.email,
     address: loginData?.body.address,
@@ -40,6 +40,7 @@ function Header({ OpenSidebar }) {
         user={user}
         isVisible={isModalVisible}
         onClose={() => setIsModalVisible(false)}
+        setData={setData}
       />
     </header>
   );

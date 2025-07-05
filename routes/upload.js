@@ -33,6 +33,7 @@ router.post(
       });
 
       const uploadedImages = await Promise.all(uploadPromises);
+      console.log(uploadedImages);
       res.status(200).json({ images: uploadedImages });
     } catch (err) {
       console.error(err);

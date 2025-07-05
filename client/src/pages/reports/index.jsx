@@ -16,7 +16,7 @@ import {
   Space,
   Button,
 } from "antd";
-import { BarChartOutlined } from "@ant-design/icons";
+import { DatabaseOutlined } from "@ant-design/icons";
 
 const { RangePicker } = DatePicker;
 
@@ -209,7 +209,7 @@ const Reports = () => {
                   }}
                 >
                   <Button
-                    icon={<BarChartOutlined />}
+                    icon={<DatabaseOutlined />}
                     style={{
                       backgroundColor: "green",
                       border: "1px solid #d9d9d9",

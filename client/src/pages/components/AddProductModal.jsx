@@ -10,53 +10,139 @@ import {
   message,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
-import { useState } from "react";
+import { useState, useContext, useEffect } from "react";
+import { LoginContext } from "../../context/LoginContext";
 
 const { Option } = Select;
 
-const AddProductModal = ({ visible, onClose, onAdd }) => {
-  const [form] = Form.useForm();
-  const [fileList, setFileList] = useState([]);
+const AddProductModal = ({
+  visible,
+  onClose,
+  onConfirm,
+  form,
+  fetchData,
+  isEdit,
+  editingRecord,
+  setIsModalVisible,
+  fileList,
+  setFileList,
+}) => {
+  // const [form] = Form.useForm();
+  const { loginData, setLoginData } = useContext(LoginContext);
+  const [uploadChange, setUploadChange] = useState(false);
 
   const handleUploadChange = ({ fileList }) => {
+    setUploadChange(true);
     setFileList(fileList);
   };
 
-  const handleSubmit = () => {
-    form.validateFields().then((values) => {
-      if (!fileList.length) {
-        message.error("Please upload a product image");
-        return;
+  const onFinish = async (values) => {
+    if (isEdit) {
+      const newData = new FormData();
+      console.log(values.images);
+      values.images?.fileList.forEach((file) => {
+        newData.append("images", file.originFileObj);
+      });
+      newData.append("productName", values.productName);
+      newData.append("brand", values.brand);
+      newData.append("model", values.model);
+      newData.append("price", values.price);
+      newData.append("stocks", values.stocks);
+      newData.append("featured", values.featured);
+      newData.append("rating", values.rating);
+      newData.append("status", values.status);
+      newData.append("company", loginData.body.company);
+
+      const data = await fetch(
+        `/api/product/edit?publicId=${editingRecord.productPublicId}`,
+        {
+          method: "PUT",
+          body: newData,
+        }
+      );
+      const res = await data.json();
+      console.log(res);
+
+      if (res.status === 200) {
+        message.success("Product Updated Successfully");
+        form.resetFields();
+        onClose();
+        fetchData();
       }
+    } else {
+      const newData = new FormData();
+      values.images?.fileList.forEach((file) => {
+        newData.append("images", file.originFileObj);
+      });
+      newData.append("productName", values.productName);
+      newData.append("brand", values.brand);
+      newData.append("model", values.model);
+      newData.append("price", values.price);
+      newData.append("stocks", values.stocks);
+      newData.append("featured", values.featured);
+      newData.append("rating", values.rating);
+      newData.append("status", values.status);
+      newData.append("company", loginData.body.company);
 
-      // Assume backend expects image file; for now send just preview URL or file object
-      const productData = {
-        ...values,
-        productImgFile: fileList[0].originFileObj, // send this to backend via FormData
-      };
+      const data = await fetch("/api/product/add", {
+        method: "POST",
+        body: newData,
+      });
 
-      onAdd(productData);
-      form.resetFields();
-      setFileList([]);
-      onClose();
-    });
+      const res = await data.json();
+      console.log(res);
+
+      if (res.status === 200) {
+        message.success("Product Added Successfully");
+        form.resetFields();
+        onClose();
+        fetchData();
+      }
+    }
   };
+
+  useEffect(() => {
+    if (editingRecord) {
+      // prefill the Upload component with existing image URL
+      if (editingRecord.productImgURL) {
+        setFileList([
+          {
+            uid: "-1",
+            name: "existing_image.jpg",
+            status: "done",
+            url: editingRecord.productImgURL,
+          },
+        ]);
+      }
+    }
+  }, [editingRecord]);
 
   return (
     <Modal
-      title="Add New Product"
+      title={isEdit ? "Edit Product" : "Add New Product"}
       open={visible}
-      onCancel={onClose}
+      onCancel={() => onClose()}
       footer={[
-        <Button key="cancel" onClick={onClose}>
+        <Button key="cancel" onClick={() => onClose()}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
-          Add Product
+        <Button key="submit" type="primary" onClick={() => onConfirm()}>
+          {isEdit ? "Edit Product" : "Add New Product"}
         </Button>,
       ]}
     >
-      <Form layout="vertical" form={form}>
+      <Form
+        form={form}
+        labelCol={{
+          span: 8,
+        }}
+        layout="vertical"
+        onFinish={onFinish}
+        autoComplete="off"
+        style={{
+          width: "100%",
+        }}
+      >
         <Form.Item
           name="productName"
           label="Product Name"
@@ -68,7 +154,7 @@ const AddProductModal = ({ visible, onClose, onAdd }) => {
           <Input />
         </Form.Item>
 
-        <Form.Item label="Product Image" required>
+        <Form.Item label="Product Image" name="images" required>
           <Upload
             listType="picture"
             beforeUpload={(file) => {
@@ -81,7 +167,7 @@ const AddProductModal = ({ visible, onClose, onAdd }) => {
             accept="image/*"
             fileList={fileList}
             onChange={handleUploadChange}
-            maxCount={1}
+            maxCount={10}
           >
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
@@ -132,7 +218,7 @@ const AddProductModal = ({ visible, onClose, onAdd }) => {
         <Form.Item
           name="rating"
           label="Rating"
-          initialValue={4.5}
+          initialValue={5}
           rules={[
             { type: "number", min: 0, max: 5, message: "Rating must be 0–5" },
           ]}
@@ -146,9 +232,9 @@ const AddProductModal = ({ visible, onClose, onAdd }) => {
           rules={[{ required: true, message: "Please select status" }]}
         >
           <Select placeholder="Select status">
-            <Option value="in-stock">In Stock</Option>
-            <Option value="out-of-stock">Out of Stock</Option>
-            <Option value="discontinued">Discontinued</Option>
+            <Option value="In Stock">In Stock</Option>
+            <Option value="Out of Stock">Out of Stock</Option>
+            <Option value="Discontinued">Discontinued</Option>
           </Select>
         </Form.Item>
       </Form>

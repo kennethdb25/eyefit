@@ -119,8 +119,8 @@ const Appointments = () => {
       render: () => (
         <>
           <div className="action-buttons">
-            <button className="edit-button">EDIT</button>
-            <button className="delete-button">DELETE</button>
+            <button className="edit-button">VIEW</button>
+            <button className="delete-button">REJECT</button>
           </div>
         </>
       ),

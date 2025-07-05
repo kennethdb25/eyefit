@@ -9,9 +9,11 @@ app.use(express.json());
 
 const uploadRoutes = require("./routes/upload");
 const UserRouter = require("./routes/User.routes");
+const ProductRouter = require("./routes/Product.routes");
 
-app.use("/api", uploadRoutes);
+// app.use("/api", uploadRoutes);
 app.use(UserRouter);
+app.use(ProductRouter);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

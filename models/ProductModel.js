@@ -10,6 +10,10 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  productPublicId: {
+    type: String,
+    required: true,
+  },
   brand: {
     type: String,
     required: [true, "Please provide a brand for the product"],

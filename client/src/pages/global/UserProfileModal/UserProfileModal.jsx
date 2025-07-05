@@ -11,7 +11,7 @@ import { LoginContext } from "../../../context/LoginContext";
 
 const { Title } = Typography;
 
-const UserProfileModal = ({ user, isVisible, onClose }) => {
+const UserProfileModal = ({ user, isVisible, onClose, setData }) => {
   const history = useNavigate();
   const [loadings, setLoadings] = useState([]);
   // eslint-disable-next-line no-unused-vars
@@ -32,10 +32,12 @@ const UserProfileModal = ({ user, isVisible, onClose }) => {
     const data = await res.json();
 
     if (data.status === 201) {
+      setData(false);
       setTimeout(() => {
         localStorage.removeItem("accountToken");
         history("/");
         setLoginData(null);
+        setData(true);
       }, 3000);
     } else {
       toast.error(res.body, {
