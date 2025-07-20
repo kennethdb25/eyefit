@@ -1,42 +1,74 @@
-import React from "react";
-import { Table, Tag } from "antd";
+import React, { useState, useContext, useEffect } from "react";
+import { Form, Table, Tag, message, Button, Popconfirm } from "antd";
+import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { LoginContext } from "../../context/LoginContext";
+import moment from "moment";
+import ViewAppointmentModal from "../components/ViewAppointmentModal";
 
 const Appointments = () => {
-  const dataSource = [
-    {
-      key: "1",
-      customerName: "Juan Pedro",
-      address: "Sulipan, Apalit, Pampanga",
-      gender: "Male",
-      age: 20,
-      order: "Eyeglass Only",
-      time: "9:00AM",
-      date: "2025-06-30",
-      status: "Pending",
-    },
-    {
-      key: "2",
-      customerName: "Ben Dimagiba",
-      address: "Sampaloc, Apalit, Pampanga",
-      gender: "Male",
-      age: 17,
-      order: "Check-up & Eyeglass",
-      time: "2:00PM",
-      date: "2025-06-20",
-      status: "Accepted",
-    },
-    {
-      key: "3",
-      customerName: "Rhea Matulid",
-      address: "Paligui, Apalit, Pampanga",
-      gender: "Female",
-      age: 62,
-      order: "Check-up Only",
-      time: "4:00PM",
-      date: "2025-07-04",
-      status: "Rejected",
-    },
-  ];
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [dataRecord, setDataRecord] = useState();
+
+  const { loginData, setLoginData } = useContext(LoginContext);
+
+  const fetchData = async () => {
+    setLoading(true); // Start loading
+    try {
+      const res = await fetch(
+        `/api/appointments?company=${loginData?.body?.company}`
+      );
+      const json = await res.json();
+      setData(json.body || []); // assuming your API responds with { body: [...] }
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  const handleUpdateStatus = async (status, id) => {
+    setLoading(true);
+
+    if (status === "Pending") {
+      message.warning("Please select a valid status.");
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/appointments/${id}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to update status");
+      }
+      await fetchData();
+      setIsModalVisible(false);
+      message.success(`Appointment ${status} successfully`);
+    } catch (error) {
+      message.error(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleOpenUpdateModal = (record) => {
+    setDataRecord(record);
+    setIsModalVisible(true);
+  };
+
+  const cancel = (e) => {
+    console.log(e);
+    message.error("Click on No");
+  };
 
   const columns = [
     {
@@ -74,6 +106,9 @@ const Appointments = () => {
       title: "Date",
       dataIndex: "date",
       key: "date",
+      render: (_, { date }) => {
+        return moment(date).format("LL");
+      },
     },
     // {
     //   title: "Price",
@@ -116,26 +151,42 @@ const Appointments = () => {
     {
       title: "Action",
       key: "action",
-      render: () => (
+      render: (_, record) => (
         <>
           <div className="action-buttons">
-            <button className="edit-button">VIEW</button>
-            <button className="delete-button">REJECT</button>
+            <button
+              className="edit-button"
+              onClick={() => handleOpenUpdateModal(record)}
+            >
+              VIEW
+            </button>
+            <Popconfirm
+              title="Update Appointment Status"
+              description="Are you sure to reject this Appointment?"
+              onConfirm={() => handleUpdateStatus("Rejected", record._id)}
+              onCancel={() => cancel()}
+              okText="Yes"
+              cancelText="No"
+            >
+              <button className="delete-button">REJECT</button>
+            </Popconfirm>
           </div>
         </>
       ),
     },
   ];
 
-  const acceptedCount = dataSource.filter(
+  const acceptedCount = data.filter(
     (item) => item.status === "Accepted"
   ).length;
-  const pendingCount = dataSource.filter(
-    (item) => item.status === "Pending"
-  ).length;
-  const rejectedCount = dataSource.filter(
+  const pendingCount = data.filter((item) => item.status === "Pending").length;
+  const rejectedCount = data.filter(
     (item) => item.status === "Rejected"
   ).length;
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   return (
     <main className="main-container">
@@ -144,51 +195,77 @@ const Appointments = () => {
       </div>
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
         {/* Count Cards */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "start",
-            gap: "10px",
-            marginBottom: "10px",
-          }}
-        >
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div
             style={{
-              backgroundColor: "green",
-              padding: "10px 15px",
-              borderRadius: "8px",
-              fontSize: "14px",
-              color: "white",
+              display: "flex",
+              justifyContent: "start",
+              gap: "10px",
+              marginBottom: "10px",
             }}
           >
-            <strong>Accepted: {acceptedCount}</strong>
+            <div
+              style={{
+                backgroundColor: "green",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Accepted: {acceptedCount}</strong>
+            </div>
+            <div
+              style={{
+                backgroundColor: "blue",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Pending: {pendingCount}</strong>
+            </div>
+            <div
+              style={{
+                backgroundColor: "red",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Rejected: {rejectedCount}</strong>
+            </div>
           </div>
-          <div
-            style={{
-              backgroundColor: "blue",
-              padding: "10px 15px",
-              borderRadius: "8px",
-              fontSize: "14px",
-              color: "white",
-            }}
-          >
-            <strong>Pending: {pendingCount}</strong>
-          </div>
-          <div
-            style={{
-              backgroundColor: "red",
-              padding: "10px 15px",
-              borderRadius: "8px",
-              fontSize: "14px",
-              color: "white",
-            }}
-          >
-            <strong>Rejected: {rejectedCount}</strong>
+          <div className="action-buttons">
+            <Button
+              icon={<ReloadOutlined style={{ fontSize: "16px" }} />}
+              onClick={fetchData}
+              loading={loading}
+              type="default"
+              style={{ marginBottom: 16 }}
+            >
+              Refresh Data
+            </Button>
           </div>
         </div>
       </div>
       <div className="main-content">
-        <Table dataSource={dataSource} columns={columns} />
+        <Table
+          dataSource={data}
+          columns={columns}
+          loading={loading}
+          rowKey="_id"
+        />
+
+        {/* Modal */}
+        <ViewAppointmentModal
+          isVisible={isModalVisible}
+          onClose={() => setIsModalVisible(false)}
+          appointment={dataRecord}
+          handleUpdateStatus={handleUpdateStatus}
+        />
       </div>
     </main>
   );

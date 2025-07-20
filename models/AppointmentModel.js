@@ -29,10 +29,6 @@ const AppointmentSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a time for the appointment"],
   },
-  isTimeSlotAvailable: {
-    type: Boolean,
-    required: true,
-  },
   status: {
     type: String,
     default: "Pending",

@@ -127,7 +127,7 @@ const AddProductModal = ({
           Cancel
         </Button>,
         <Button key="submit" type="primary" onClick={() => onConfirm()}>
-          {isEdit ? "Edit Product" : "Add New Product"}
+          {isEdit ? "Update Product" : "Add New Product"}
         </Button>,
       ]}
     >

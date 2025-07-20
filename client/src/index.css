@@ -207,6 +207,18 @@ code {
   color: white !important;
 }
 
+.ant-select-disabled .ant-select-selector {
+  background-color: #f5f5f5 !important;
+  color: #000 !important;
+  font-weight: 500;
+}
+
+.ant-picker .ant-picker-disabled {
+  background-color: #f5f5f5 !important;
+  color: #000 !important;
+  font-weight: 500;
+}
+
 .transparent-spin {
   background: transparent !important;
   color: white;

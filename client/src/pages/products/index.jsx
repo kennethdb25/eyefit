@@ -1,8 +1,8 @@
-import React, { useState, useContext } from "react";
+/* eslint-disable no-unused-vars */
+import React, { useState, useContext, useEffect } from "react";
 import { Form, Table, Tag, message, Button, Popconfirm } from "antd";
 import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import AddProductModal from "../components/AddProductModal";
-import { useEffect } from "react";
 import { LoginContext } from "../../context/LoginContext";
 
 const Products = () => {
@@ -13,7 +13,6 @@ const Products = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [fileList, setFileList] = useState([]);
-  const [productData, setProductData] = useState([]);
 
   const { loginData, setLoginData } = useContext(LoginContext);
 
