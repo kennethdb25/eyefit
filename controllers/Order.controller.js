@@ -1,0 +1,117 @@
+const UserModel = require("../models/UserModel");
+const ProductModel = require("../models/ProductModel");
+const OrderModel = require("../models/OrderModel");
+const InventoryModel = require("../models/InventoryModel");
+
+const AddOrder = async (req, res) => {
+  const { userId, products } = req.body;
+  let previousCompany = null;
+
+  try {
+    // Check user
+    const user = await UserModel.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    let totalAmount = 0;
+    const productUpdates = [];
+    const validatedProducts = [];
+
+    for (const item of products) {
+      const { productId, quantity } = item;
+
+      const product = await ProductModel.findById(productId);
+      if (!product) {
+        return res
+          .status(404)
+          .json({ message: `Product ${productId} not found` });
+      }
+
+      if (product.stocks < quantity) {
+        return res
+          .status(400)
+          .json({ message: `Insufficient stock for ${product.name}` });
+      }
+
+      if (previousCompany === null) {
+        previousCompany = product.company;
+      } else {
+        if (product.company === previousCompany) {
+          console.log("Same company");
+        } else {
+          console.log("Not the same company");
+          return res.status(401).json({
+            message:
+              "Unauthorized Transaction. Please make sure that items are on the same company or establishments",
+          });
+        }
+      }
+
+      previousCompany = product.company;
+
+      totalAmount += product.price * quantity;
+
+      // Store for later use
+      validatedProducts.push({ product, quantity });
+    }
+
+    // All validation passed — now deduct stocks and save
+    for (const { product, quantity } of validatedProducts) {
+      product.stocks -= quantity;
+      productUpdates.push(product.save());
+    }
+    // Save updated stocks
+    const inventoryProduct = await Promise.all(productUpdates);
+
+    // Create order
+    const newOrder = new OrderModel({
+      user: userId,
+      products: products.map((p) => ({
+        product: p.productId,
+        quantity: p.quantity,
+      })),
+      company: inventoryProduct[0].company || inventoryProduct.company,
+      total: totalAmount,
+    });
+
+    for (const item of inventoryProduct) {
+      const foundProduct = products.find(
+        (orderProduct) => orderProduct?.productId === item?._id.toString()
+      );
+      await InventoryModel.create({
+        product: item._id,
+        company: item.company,
+        change: -foundProduct.quantity,
+        reason: "order",
+        relatedOrder: newOrder._id, // after saving order
+        updatedBy: userId,
+      });
+    }
+
+    const savedOrder = await newOrder.save();
+
+    res.status(201).json({
+      message: "Order placed successfully",
+      order: savedOrder,
+    });
+  } catch (error) {
+    console.error("Order Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const GetAllOrderPerCompany = async (req, res) => {
+  try {
+    const company = req.query.company || "";
+
+    const allOrder = await OrderModel.find({ company })
+      .populate("user") // optional: if you also want full user data
+      .populate("products.product"); // <-- this populates product details
+
+    return res.status(200).json({ status: 200, body: allOrder });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+};
+
+module.exports = { AddOrder, GetAllOrderPerCompany };

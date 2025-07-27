@@ -32,6 +32,12 @@ const ViewAppointmentModal = ({
         </Button>,
         <button
           key="reject"
+          hidden={
+            appointment?.status === "Rejected" ||
+            appointment?.status === "Accepted"
+              ? true
+              : false
+          }
           onClick={() => handleUpdateStatus("Rejected", appointment?._id)}
           style={{
             backgroundColor: "#ff4d4f",
@@ -46,6 +52,12 @@ const ViewAppointmentModal = ({
         </button>,
         <button
           key="accept"
+          hidden={
+            appointment?.status === "Rejected" ||
+            appointment?.status === "Accepted"
+              ? true
+              : false
+          }
           onClick={() => handleUpdateStatus("Accepted", appointment?._id)}
           style={{
             backgroundColor: "#52c41a",

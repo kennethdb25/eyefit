@@ -7,15 +7,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const uploadRoutes = require("./routes/upload");
-const UserRouter = require("./routes/User.routes");
+// const uploadRoutes = require("./routes/upload");
+const AccountRouter = require("./routes/Account.routes");
 const ProductRouter = require("./routes/Product.routes");
 const AppointmentRouter = require("./routes/Appointment.routes");
+const UserRouter = require("./routes/User.routes");
+const OrderRouter = require("./routes/Order.routes");
 
 // app.use("/api", uploadRoutes);
-app.use(UserRouter);
+app.use(AccountRouter);
 app.use(ProductRouter);
 app.use(AppointmentRouter);
+app.use(UserRouter);
+app.use(OrderRouter);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

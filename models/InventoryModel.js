@@ -1,40 +1,35 @@
 const mongoose = require("mongoose");
 
 const InventorySchema = new mongoose.Schema({
-  productName: {
-    type: String,
-    required: [true, "Please provide a name for the product"],
-    maxlength: [40, "Name can not be more than 40 characters"],
-  },
-  productImgURL: {
-    type: String,
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "ProductInfo",
     required: true,
-  },
-  brand: {
-    type: String,
-    required: [true, "Please provide a brand for the product"],
-    maxlength: [40, "Brand can not be more than 40 characters"],
-  },
-  model: {
-    type: String,
-    required: [true, "Please provide a model for the product"],
-    maxlength: [40, "Model can not be more than 40 characters"],
-  },
-  price: {
-    type: Number,
-    required: [true, "Please provide a price for the product"],
-  },
-  stocksLeft: {
-    type: Number,
-    required: true,
-  },
-  sold: {
-    type: Number,
-    default: 0,
   },
   company: {
     type: String,
     required: true,
+  },
+  change: {
+    type: Number, // positive for restock, negative for deduction
+    required: true,
+  },
+  reason: {
+    type: String,
+    enum: ["order", "restock", "adjustment", "return"],
+    required: true,
+  },
+  relatedOrder: {
+    type: String,
+    required: true,
+  },
+  updatedBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // optional: tracks the admin/user who made the change
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
