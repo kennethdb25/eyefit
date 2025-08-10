@@ -143,14 +143,14 @@ const LoginForm = (props) => {
                   justifyContent: "space-between",
                 }}
               >
-                <Form.Item>
+                {/* <Form.Item>
                   <Typography
                     onClick={showSignUpForm}
                     style={{ cursor: "pointer", color: "gray" }}
                   >
                     No Account? Register Here!
                   </Typography>
-                </Form.Item>
+                </Form.Item> */}
                 <Form.Item>
                   <Typography
                     component={Link}
