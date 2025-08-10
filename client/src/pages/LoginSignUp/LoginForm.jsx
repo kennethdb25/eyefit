@@ -140,7 +140,7 @@ const LoginForm = (props) => {
                 style={{
                   display: "flex",
                   flexDirection: "row",
-                  justifyContent: "space-between",
+                  justifyContent: "center",
                 }}
               >
                 {/* <Form.Item>
