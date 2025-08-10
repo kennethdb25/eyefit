@@ -168,7 +168,16 @@ const Appointments = () => {
               okText="Yes"
               cancelText="No"
             >
-              <button className="delete-button">REJECT</button>
+              <button
+                hidden={
+                  record?.status === "Rejected" || record?.status === "Accepted"
+                    ? true
+                    : false
+                }
+                className="delete-button"
+              >
+                REJECT
+              </button>
             </Popconfirm>
           </div>
         </>

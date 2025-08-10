@@ -91,14 +91,14 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         >
           <BsMenuButtonWideFill className="icon" /> Reports
         </li>
-        <li
+        {/* <li
           className="sidebar-list-item"
           onClick={() => {
             onNavigate("/setting");
           }}
         >
           <BsFillGearFill className="icon" /> Setting
-        </li>
+        </li> */}
       </ul>
     </aside>
   );

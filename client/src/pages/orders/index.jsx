@@ -72,42 +72,38 @@ const Orders = () => {
 
   const columns = [
     {
-      title: "User Id",
-      dataIndex: "customerName",
-      key: "customerName",
+      title: "Order Id",
+      dataIndex: "_id",
+      key: "_id",
       className: "blue-text",
     },
     {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
+      title: "Customer Id",
+      dataIndex: ["user", "_id"],
+      key: ["user", "_id"],
+      className: "blue-text",
     },
     {
-      title: "Gender",
-      dataIndex: "gender",
-      key: "gender",
+      title: "Name",
+      dataIndex: ["user", "name"],
+      key: ["user", "name"],
     },
     {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
+      title: "Email",
+      dataIndex: ["user", "email"],
+      key: ["user", "email"],
     },
     {
-      title: "Order",
-      dataIndex: "order",
-      key: "order",
+      title: "Contact Number",
+      dataIndex: ["user", "contact"],
+      key: ["user", "contact"],
     },
     {
-      title: "Time",
-      dataIndex: "time",
-      key: "time",
-    },
-    {
-      title: "Date",
-      dataIndex: "date",
-      key: "date",
-      render: (_, { date }) => {
-        return moment(date).format("LL");
+      title: "Order Date",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      render: (_, { createdAt }) => {
+        return moment(createdAt).format("LL");
       },
     },
     // {
@@ -123,9 +119,9 @@ const Orders = () => {
         <>
           {status === "Shipped" ? (
             <Tag color="Yellow">{status.toUpperCase()}</Tag>
-          ) : status === "Pending" ? (
+          ) : status === "Pending" || status === "pending" ? (
             <Tag color="blue">{status.toUpperCase()}</Tag>
-          ) : status === "Delivered" ? (
+          ) : status === "Completed" ? (
             <Tag color="green">{status.toUpperCase()}</Tag>
           ) : (
             <Tag color="orange">{status.toUpperCase()}</Tag>
@@ -134,16 +130,20 @@ const Orders = () => {
       ),
       filters: [
         {
-          text: "Accepted",
-          value: "Accepted",
+          text: "Completed",
+          value: "Completed",
+        },
+        {
+          text: "Shipped",
+          value: "Shipped",
+        },
+        {
+          text: "Processing",
+          value: "Processing",
         },
         {
           text: "Pending",
           value: "Pending",
-        },
-        {
-          text: "Rejected",
-          value: "Rejected",
         },
       ],
       onFilter: (value, record) => record.status.indexOf(value) === 0,
@@ -163,24 +163,125 @@ const Orders = () => {
               VIEW
             </button>
             <Popconfirm
-              title="Update Appointment Status"
-              description="Are you sure to reject this Appointment?"
+              title="Update Order Status"
+              description="Are you sure to cancel this Order?"
               onConfirm={() => handleUpdateStatus("Rejected", record._id)}
               onCancel={() => cancel()}
               okText="Yes"
               cancelText="No"
             >
-              <button className="delete-button">REJECT</button>
+              <button className="delete-button">CANCEL</button>
             </Popconfirm>
           </div>
         </>
       ),
     },
   ];
+
+  const pendingCount = data.filter((item) => item.status === "Pending").length;
+  const processingCount = data.filter(
+    (item) => item.status === "Processing"
+  ).length;
+  const shippedCount = data.filter((item) => item.status === "Shipped").length;
+  const completedCount = data.filter(
+    (item) => item.status === "Completed"
+  ).length;
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   return (
     <main className="main-container">
       <div className="main-title">
         <h3>ORDERS</h3>
+      </div>
+
+      <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
+        {/* Count Cards */}
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "start",
+              gap: "10px",
+              marginBottom: "10px",
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: "red",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Pending: {pendingCount}</strong>
+            </div>
+            <div
+              style={{
+                backgroundColor: "orange",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Processing:{processingCount} </strong>
+            </div>
+            <div
+              style={{
+                backgroundColor: "blue",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Shipped:{shippedCount} </strong>
+            </div>
+            <div
+              style={{
+                backgroundColor: "green",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Completed:{completedCount} </strong>
+            </div>
+          </div>
+          <div className="action-buttons">
+            {/* <Button
+              icon={<PlusOutlined style={{ fontSize: "16px" }} />}
+              onClick={() => showAddModal()}
+              type="primary"
+              style={{ marginBottom: 16 }}
+            >
+              Add Product
+            </Button> */}
+            <Button
+              icon={<ReloadOutlined style={{ fontSize: "16px" }} />}
+              onClick={fetchData}
+              loading={loading}
+              type="default"
+              style={{ marginBottom: 16 }}
+            >
+              Refresh Data
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="main-content">
+        <Table
+          dataSource={data}
+          columns={columns}
+          loading={loading}
+          rowKey="_id"
+        />
       </div>
     </main>
   );
