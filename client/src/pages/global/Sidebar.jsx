@@ -89,6 +89,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
             onNavigate("/reports");
           }}
         >
+          {/* Remove reports in Sidebar and App.js (Main Content) */}
           <BsMenuButtonWideFill className="icon" /> Reports
         </li>
         {/* <li

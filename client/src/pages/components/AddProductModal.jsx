@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import {
   Modal,
   Form,
@@ -30,6 +31,7 @@ const AddProductModal = ({
   // const [form] = Form.useForm();
   const { loginData, setLoginData } = useContext(LoginContext);
   const [uploadChange, setUploadChange] = useState(false);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const handleUploadChange = ({ fileList }) => {
     setUploadChange(true);
@@ -64,7 +66,7 @@ const AddProductModal = ({
       console.log(res);
 
       if (res.status === 200) {
-        message.success("Product Updated Successfully");
+        messageApi.success("Product Updated Successfully");
         form.resetFields();
         onClose();
         fetchData();
@@ -93,7 +95,7 @@ const AddProductModal = ({
       console.log(res);
 
       if (res.status === 200) {
-        message.success("Product Added Successfully");
+        messageApi.success("Product Added Successfully");
         form.resetFields();
         onClose();
         fetchData();
@@ -131,6 +133,7 @@ const AddProductModal = ({
         </Button>,
       ]}
     >
+      {contextHolder}
       <Form
         form={form}
         labelCol={{

@@ -4,14 +4,16 @@ import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import { LoginContext } from "../../context/LoginContext";
 import moment from "moment";
 import ViewAppointmentModal from "../components/ViewAppointmentModal";
+import ViewOrderModal from "../components/ViewOrderModal";
 
 const Orders = () => {
-  const [isModalVisible, setIsModalVisible] = useState(false);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [dataRecord, setDataRecord] = useState();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   const { loginData, setLoginData } = useContext(LoginContext);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const fetchData = async () => {
     setLoading(true); // Start loading
@@ -30,9 +32,20 @@ const Orders = () => {
 
   const handleUpdateStatus = async (status, id) => {
     setLoading(true);
+    const validateStocks = selectedOrder.products.filter(
+      (item) => item.product.status === "Out of Stock"
+    );
+
+    if (validateStocks.length > 0 && status === "Processing") {
+      messageApi.warning("Some product are out of stock");
+      setLoading(false);
+      setIsModalOpen(false);
+      return;
+    }
 
     if (status === "Pending") {
-      message.warning("Please select a valid status.");
+      messageApi.warning("Please select a valid status.");
+      setLoading(false);
       return;
     }
 
@@ -51,18 +64,19 @@ const Orders = () => {
         throw new Error(data.message || "Failed to update status");
       }
       await fetchData();
-      setIsModalVisible(false);
-      message.success(`Appointment ${status} successfully`);
+      setIsModalOpen(false);
+      messageApi.success(`Order ${status} successfully`);
     } catch (error) {
-      message.error(error.message);
+      messageApi.error(error.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOpenUpdateModal = (record) => {
-    setDataRecord(record);
-    setIsModalVisible(true);
+  const handleOpenModal = (record) => {
+    console.log(record);
+    setSelectedOrder(record);
+    setIsModalOpen(true);
   };
 
   const cancel = (e) => {
@@ -117,10 +131,12 @@ const Orders = () => {
       key: "status",
       render: (_, { status }) => (
         <>
-          {status === "Shipped" ? (
-            <Tag color="Yellow">{status.toUpperCase()}</Tag>
-          ) : status === "Pending" || status === "pending" ? (
+          {status === "Cancelled" ? (
+            <Tag color="red">{status.toUpperCase()}</Tag>
+          ) : status === "Shipped" ? (
             <Tag color="blue">{status.toUpperCase()}</Tag>
+          ) : status === "Pending" || status === "pending" ? (
+            <Tag color="purple">{status.toUpperCase()}</Tag>
           ) : status === "Completed" ? (
             <Tag color="green">{status.toUpperCase()}</Tag>
           ) : (
@@ -158,19 +174,28 @@ const Orders = () => {
           <div className="action-buttons">
             <button
               className="edit-button"
-              onClick={() => handleOpenUpdateModal(record)}
+              onClick={() => handleOpenModal(record)}
             >
               VIEW
             </button>
             <Popconfirm
               title="Update Order Status"
               description="Are you sure to cancel this Order?"
-              onConfirm={() => handleUpdateStatus("Rejected", record._id)}
+              onConfirm={() => handleUpdateStatus("Cancelled", record._id)}
               onCancel={() => cancel()}
               okText="Yes"
               cancelText="No"
             >
-              <button className="delete-button">CANCEL</button>
+              <button
+                hidden={
+                  record?.status === "Shipped" || record?.status === "Completed"
+                    ? true
+                    : false
+                }
+                className="delete-button"
+              >
+                CANCEL
+              </button>
             </Popconfirm>
           </div>
         </>
@@ -178,6 +203,9 @@ const Orders = () => {
     },
   ];
 
+  const cancelledCount = data.filter(
+    (item) => item.status === "Cancelled"
+  ).length;
   const pendingCount = data.filter((item) => item.status === "Pending").length;
   const processingCount = data.filter(
     (item) => item.status === "Processing"
@@ -193,6 +221,7 @@ const Orders = () => {
 
   return (
     <main className="main-container">
+      {contextHolder}
       <div className="main-title">
         <h3>ORDERS</h3>
       </div>
@@ -211,6 +240,17 @@ const Orders = () => {
             <div
               style={{
                 backgroundColor: "red",
+                padding: "10px 15px",
+                borderRadius: "8px",
+                fontSize: "14px",
+                color: "white",
+              }}
+            >
+              <strong>Cancelled: {cancelledCount}</strong>
+            </div>
+            <div
+              style={{
+                backgroundColor: "purple",
                 padding: "10px 15px",
                 borderRadius: "8px",
                 fontSize: "14px",
@@ -283,6 +323,13 @@ const Orders = () => {
           rowKey="_id"
         />
       </div>
+
+      <ViewOrderModal
+        isModalOpen={isModalOpen}
+        setIsModalOpen={setIsModalOpen}
+        selectedOrder={selectedOrder}
+        handleUpdateStatus={handleUpdateStatus}
+      />
     </main>
   );
 };

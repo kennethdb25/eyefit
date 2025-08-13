@@ -4,6 +4,7 @@ import { Form, Table, Tag, message, Button, Popconfirm } from "antd";
 import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import AddProductModal from "../components/AddProductModal";
 import { LoginContext } from "../../context/LoginContext";
+import { DatabaseOutlined } from "@ant-design/icons";
 
 const Products = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -89,6 +90,11 @@ const Products = () => {
       render: (_, { price }) => <>{`Php ${price}.00`}</>,
     },
     {
+      title: "Rating",
+      dataIndex: "rating",
+      key: "rating",
+    },
+    {
       title: "Status",
       dataIndex: "status",
       key: "status",
@@ -133,7 +139,7 @@ const Products = () => {
             >
               EDIT
             </button>
-            <Popconfirm
+            {/* <Popconfirm
               title="Delete Product"
               description="Are you sure to delete this product?"
               onConfirm={() => confirm()}
@@ -142,7 +148,7 @@ const Products = () => {
               cancelText="No"
             >
               <button className="delete-button">DELETE</button>
-            </Popconfirm>
+            </Popconfirm> */}
           </div>
         </>
       ),
@@ -219,6 +225,14 @@ const Products = () => {
             </div>
           </div>
           <div className="action-buttons">
+            <Button
+              icon={<DatabaseOutlined style={{ fontSize: "16px" }} />}
+              onClick={() => showAddModal()}
+              type="primary"
+              style={{ marginBottom: 16 }}
+            >
+              Generate Report
+            </Button>
             <Button
               icon={<PlusOutlined style={{ fontSize: "16px" }} />}
               onClick={() => showAddModal()}
