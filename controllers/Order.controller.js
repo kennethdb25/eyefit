@@ -2,6 +2,7 @@ const UserModel = require("../models/UserModel");
 const ProductModel = require("../models/ProductModel");
 const OrderModel = require("../models/OrderModel");
 const InventoryModel = require("../models/InventoryModel");
+const DeliveryModel = require("../models/DeliverModel");
 
 const AddOrder = async (req, res) => {
   const { userId, products } = req.body;
@@ -73,20 +74,6 @@ const AddOrder = async (req, res) => {
       total: totalAmount,
     });
 
-    for (const item of inventoryProduct) {
-      const foundProduct = products.find(
-        (orderProduct) => orderProduct?.productId === item?._id.toString()
-      );
-      await InventoryModel.create({
-        product: item._id,
-        company: item.company,
-        change: -foundProduct.quantity,
-        reason: "order",
-        relatedOrder: newOrder._id, // after saving order
-        updatedBy: userId,
-      });
-    }
-
     const savedOrder = await newOrder.save();
 
     res.status(201).json({
@@ -114,4 +101,82 @@ const GetAllOrderPerCompany = async (req, res) => {
   }
 };
 
-module.exports = { AddOrder, GetAllOrderPerCompany };
+const UpdateOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  // Only allow "Cancelled", "Processing", "Shipped" or "Completed"
+  if (!["Cancelled", "Processing", "Shipped", "Completed"].includes(status)) {
+    return res.status(400).json({
+      success: false,
+      message:
+        "Invalid status. Must be 'Cancelled', 'Processing', 'Shipped' or 'Completed'.",
+    });
+  }
+
+  try {
+    const updateOrder = await OrderModel.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+
+    if (!updateOrder) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (status === "Shipped") {
+      const { _id, company } = updateOrder;
+
+      const newDelivery = new DeliveryModel({
+        order: _id,
+        company,
+      });
+      await newDelivery.save();
+    }
+
+    if (status === "Completed") {
+      const { _id } = updateOrder;
+
+      const deliveryRecord = await DeliveryModel.findOne({ order: _id });
+
+      if (deliveryRecord) {
+        await DeliveryModel.findOneAndUpdate(
+          { order: _id }, // match by order reference
+          { status },
+          { new: true }
+        );
+      }
+
+      // for (const item of inventoryProduct) {
+      //   const foundProduct = products.find(
+      //     (orderProduct) => orderProduct?.productId === item?._id.toString()
+      //   );
+      //   await InventoryModel.create({
+      //     product: item._id,
+      //     company: item.company,
+      //     change: -foundProduct.quantity,
+      //     reason: "order",
+      //     relatedOrder: newOrder._id, // after saving order
+      //     updatedBy: userId,
+      //   });
+      // }
+      //Inventory function transfer here
+    }
+
+    res.status(200).json({
+      success: true,
+      data: updateOrder,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+module.exports = { AddOrder, GetAllOrderPerCompany, UpdateOrderStatus };

@@ -13,6 +13,7 @@ const ProductRouter = require("./routes/Product.routes");
 const AppointmentRouter = require("./routes/Appointment.routes");
 const UserRouter = require("./routes/User.routes");
 const OrderRouter = require("./routes/Order.routes");
+const DeliveryRouter = require("./routes/Delivery.routes");
 
 // app.use("/api", uploadRoutes);
 app.use(AccountRouter);
@@ -20,6 +21,7 @@ app.use(ProductRouter);
 app.use(AppointmentRouter);
 app.use(UserRouter);
 app.use(OrderRouter);
+app.use(DeliveryRouter);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
