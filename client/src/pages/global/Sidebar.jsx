@@ -1,5 +1,6 @@
+/* eslint-disable no-unused-vars */
+import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import React from "react";
 import {
   BsEyeglasses,
   BsGrid1X2Fill,
@@ -7,13 +8,14 @@ import {
   BsCalendar3,
   BsPeopleFill,
   BsListCheck,
-  BsMenuButtonWideFill,
-  BsFillGearFill,
   BsTruck,
+  BsFillGearFill,
 } from "react-icons/bs";
+import { LoginContext } from "../../context/LoginContext.js";
 
 function Sidebar({ openSidebarToggle, OpenSidebar }) {
   const navigate = useNavigate();
+  const { loginData, setLoginData } = useContext(LoginContext);
 
   const onNavigate = (path) => {
     navigate(path);
@@ -44,6 +46,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
+          hidden={loginData.body.userType === "ADMIN USER" ? true : false}
           onClick={() => {
             onNavigate("/products");
           }}
@@ -52,6 +55,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
+          hidden={loginData.body.userType === "ADMIN USER" ? true : false}
           onClick={() => {
             onNavigate("/appointments");
           }}
@@ -61,6 +65,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
+          hidden={loginData.body.userType === "ADMIN USER" ? true : false}
           onClick={() => {
             onNavigate("/order");
           }}
@@ -69,6 +74,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
+          hidden={loginData.body.userType === "ADMIN USER" ? true : false}
           onClick={() => {
             onNavigate("/delivery");
           }}
@@ -77,6 +83,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
+          hidden={loginData.body.userType === "ADMIN USER" ? true : false}
           onClick={() => {
             onNavigate("/inventory");
           }}
@@ -85,21 +92,13 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
-          onClick={() => {
-            onNavigate("/reports");
-          }}
-        >
-          {/* Remove reports in Sidebar and App.js (Main Content) */}
-          <BsMenuButtonWideFill className="icon" /> Reports
-        </li>
-        {/* <li
-          className="sidebar-list-item"
+          hidden={loginData.body.userType !== "ADMIN USER" ? true : false}
           onClick={() => {
             onNavigate("/setting");
           }}
         >
           <BsFillGearFill className="icon" /> Setting
-        </li> */}
+        </li>
       </ul>
     </aside>
   );

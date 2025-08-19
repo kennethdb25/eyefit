@@ -3,6 +3,9 @@ const ProductModel = require("../models/ProductModel");
 const OrderModel = require("../models/OrderModel");
 const InventoryModel = require("../models/InventoryModel");
 const DeliveryModel = require("../models/DeliverModel");
+const NotificationModel = require("../models/NotificationModel");
+
+// const { BadRequest } = require("../utils/httpError");
 
 const AddOrder = async (req, res) => {
   const { userId, products } = req.body;
@@ -76,6 +79,31 @@ const AddOrder = async (req, res) => {
 
     const savedOrder = await newOrder.save();
 
+    // if (inventoryProduct[0]?.company || inventoryProduct?.company) throw new Error("Company is required");
+
+    if (savedOrder) {
+      await NotificationModel.create({
+        type: "New Order",
+        orderId: savedOrder._id,
+        userId,
+        path: "order",
+        company: inventoryProduct[0]?.company || inventoryProduct?.company,
+        message: `Order #${savedOrder._id} placed by ${userId || "customer"}`
+      });
+
+
+      const newInventory = new InventoryModel({
+        user: savedOrder.user,
+        orderId: savedOrder._id,   // ✅ use the saved order’s id
+        company: savedOrder.company,
+        products: savedOrder.products,
+        total: savedOrder.total,
+      });
+
+
+      await newInventory.save();
+    }
+
     res.status(201).json({
       message: "Order placed successfully",
       order: savedOrder,
@@ -94,7 +122,7 @@ const GetAllOrderPerCompany = async (req, res) => {
       .populate("user") // optional: if you also want full user data
       .populate("products.product"); // <-- this populates product details
 
-    return res.status(200).json({ status: 200, body: allOrder });
+    return res.status(200).json({ success: true, body: allOrder });
   } catch (error) {
     console.log(error);
     return res.status(404).json(error);
@@ -128,6 +156,18 @@ const UpdateOrderStatus = async (req, res) => {
       });
     }
 
+    const updateInventoryStatus = await InventoryModel.findOne({ orderId: updateOrder._id });
+
+    if (updateInventoryStatus) {
+      const { _id } = updateInventoryStatus;
+
+      await InventoryModel.findByIdAndUpdate(
+        _id,
+        { status },
+        { new: true }
+      );
+    }
+
     if (status === "Shipped") {
       const { _id, company } = updateOrder;
 
@@ -150,21 +190,6 @@ const UpdateOrderStatus = async (req, res) => {
           { new: true }
         );
       }
-
-      // for (const item of inventoryProduct) {
-      //   const foundProduct = products.find(
-      //     (orderProduct) => orderProduct?.productId === item?._id.toString()
-      //   );
-      //   await InventoryModel.create({
-      //     product: item._id,
-      //     company: item.company,
-      //     change: -foundProduct.quantity,
-      //     reason: "order",
-      //     relatedOrder: newOrder._id, // after saving order
-      //     updatedBy: userId,
-      //   });
-      // }
-      //Inventory function transfer here
     }
 
     res.status(200).json({

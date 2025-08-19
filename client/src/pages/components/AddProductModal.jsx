@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable react-hooks/exhaustive-deps */
 import {
   Modal,
@@ -24,11 +25,9 @@ const AddProductModal = ({
   fetchData,
   isEdit,
   editingRecord,
-  setIsModalVisible,
   fileList,
   setFileList,
 }) => {
-  // const [form] = Form.useForm();
   const { loginData, setLoginData } = useContext(LoginContext);
   const [uploadChange, setUploadChange] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
@@ -40,6 +39,13 @@ const AddProductModal = ({
 
   const onFinish = async (values) => {
     if (isEdit) {
+      if (
+        (values.stocks === 0 && values.status === "In Stock") ||
+        (values.stocks > 0 && values.status !== "In Stock")
+      ) {
+        messageApi.info("Invalid Input!");
+        return;
+      }
       const newData = new FormData();
       console.log(values.images);
       values.images?.fileList.forEach((file) => {
@@ -65,13 +71,20 @@ const AddProductModal = ({
       const res = await data.json();
       console.log(res);
 
-      if (res.status === 200) {
+      if (res.success) {
         messageApi.success("Product Updated Successfully");
         form.resetFields();
         onClose();
         fetchData();
       }
     } else {
+      if (
+        (values.stocks === 0 && values.status === "In Stock") ||
+        (values.stocks > 0 && values.status !== "In Stock")
+      ) {
+        messageApi.info("Invalid Input!");
+        return;
+      }
       const newData = new FormData();
       values.images?.fileList.forEach((file) => {
         newData.append("images", file.originFileObj);
@@ -94,7 +107,7 @@ const AddProductModal = ({
       const res = await data.json();
       console.log(res);
 
-      if (res.status === 200) {
+      if (res.success) {
         messageApi.success("Product Added Successfully");
         form.resetFields();
         onClose();
@@ -123,6 +136,7 @@ const AddProductModal = ({
     <Modal
       title={isEdit ? "Edit Product" : "Add New Product"}
       open={visible}
+      width={1200}
       onCancel={() => onClose()}
       footer={[
         <Button key="cancel" onClick={() => onClose()}>
@@ -215,7 +229,7 @@ const AddProductModal = ({
         </Form.Item>
 
         <Form.Item name="featured" label="Featured" valuePropName="checked">
-          <Switch />
+          <Switch defaultChecked />
         </Form.Item>
 
         <Form.Item

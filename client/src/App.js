@@ -10,7 +10,6 @@ import Products from "./pages/products";
 import Appointments from "./pages/appointments";
 import Orders from "./pages/orders";
 import Inventory from "./pages/inventory";
-import Reports from "./pages/reports";
 import Setting from "./pages/setting";
 import Delivery from "./pages/delivery";
 import "antd/dist/reset.css"; //
@@ -176,22 +175,6 @@ function App() {
                       setData={setData}
                     >
                       <Inventory />
-                    </DashboardLayout>
-                  }
-                />
-              </>
-            )}
-            {loginData && (
-              <>
-                <Route
-                  path="/reports"
-                  element={
-                    <DashboardLayout
-                      OpenSidebar={OpenSidebar}
-                      openSidebarToggle={openSidebarToggle}
-                      setData={setData}
-                    >
-                      <Reports />
                     </DashboardLayout>
                   }
                 />

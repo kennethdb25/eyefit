@@ -16,9 +16,8 @@ const buttonStyle = {
   marginRight: "10px",
 };
 
-const ViewOrderModal = (props) => {
-  const { isModalOpen, setIsModalOpen, selectedOrder, handleUpdateStatus } =
-    props;
+const ViewInventoryModal = (props) => {
+  const { isModalOpen, setIsModalOpen, selectedOrder } = props;
   return (
     <>
       <Modal
@@ -33,91 +32,6 @@ const ViewOrderModal = (props) => {
           >
             Close
           </Button>,
-          <button
-            key="reject"
-            hidden={
-              selectedOrder?.status === "Completed" ||
-              selectedOrder?.status === "Shipped" ||
-              selectedOrder?.status === "Cancelled"
-                ? true
-                : false
-            }
-            onClick={() => handleUpdateStatus("Cancelled", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#ff4d4f",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
-          >
-            Cancel
-          </button>,
-          <button
-            key="process"
-            hidden={
-              selectedOrder?.status === "Shipped" ||
-              selectedOrder?.status === "Processing" ||
-              selectedOrder?.status === "Cancelled" ||
-              selectedOrder?.status === "Completed"
-                ? true
-                : false
-            }
-            onClick={() => handleUpdateStatus("Processing", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#52c41a",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-            }}
-          >
-            Process
-          </button>,
-          <button
-            key="shipped"
-            hidden={
-              selectedOrder?.status === "Shipped" ||
-              selectedOrder?.status === "Pending" ||
-              selectedOrder?.status === "Cancelled" ||
-              selectedOrder?.status === "Completed"
-                ? true
-                : false
-            }
-            onClick={() => handleUpdateStatus("Shipped", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#52c41a",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
-          >
-            Shipped
-          </button>,
-          <button
-            key="complete"
-            hidden={
-              selectedOrder?.status === "Pending" ||
-              selectedOrder?.status === "Cancelled" ||
-              selectedOrder?.status === "Completed"
-                ? true
-                : false
-            }
-            onClick={() => handleUpdateStatus("Completed", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#52c41a",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
-          >
-            Complete
-          </button>,
         ]}
         width={900}
         style={{ top: 20 }}
@@ -141,12 +55,15 @@ const ViewOrderModal = (props) => {
                   <Text strong>Name: </Text> {selectedOrder.user.name}
                 </Col>
                 <Col span={12}>
-                  <Text strong>Order Id: </Text> {selectedOrder._id}
+                  <Text strong>Delivery Id: </Text> {selectedOrder._id}
                 </Col>
                 <Col span={12}>
                   <Text strong>Contact: </Text> {selectedOrder.user.contact}
                 </Col>
                 <Col span={12}>
+                  <Text strong>Order Id: </Text> {selectedOrder.orderId}
+                </Col>
+                <Col span={24}>
                   <Text strong>Email: </Text> {selectedOrder.user.email}
                 </Col>
                 <Col span={24}>
@@ -251,4 +168,4 @@ const ViewOrderModal = (props) => {
   );
 };
 
-export default ViewOrderModal;
+export default ViewInventoryModal;

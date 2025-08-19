@@ -1,31 +1,40 @@
 const mongoose = require("mongoose");
 
 const InventorySchema = new mongoose.Schema({
-  product: {
+  orderId: {
+    type: String,
+    required: true,
+  },
+  user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "ProductInfo",
+    ref: "User",
+    required: true,
+  },
+  products: [
+    {
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ProductInfo",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+      },
+    },
+  ],
+  total: {
+    type: Number,
     required: true,
   },
   company: {
     type: String,
     required: true,
   },
-  change: {
-    type: Number, // positive for restock, negative for deduction
-    required: true,
-  },
-  reason: {
+  status: {
     type: String,
-    enum: ["order", "restock", "adjustment", "return"],
-    required: true,
-  },
-  relatedOrder: {
-    type: String,
-    required: true,
-  },
-  updatedBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // optional: tracks the admin/user who made the change
+    enum: ["Pending", "Processing", "Shipped", "Delivered"],
+    default: "Pending",
   },
   createdAt: {
     type: Date,

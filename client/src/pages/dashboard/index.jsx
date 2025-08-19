@@ -1,4 +1,3 @@
-import React from "react";
 import {
   BsFillArchiveFill,
   BsFillGrid3X3GapFill,

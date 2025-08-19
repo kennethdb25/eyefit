@@ -12,7 +12,7 @@ const GetAllDeliveryPerCompany = async (req, res) => {
         { path: "products.product", model: "ProductInfo" }, // populate each product in products array
       ],
     });
-    return res.status(200).json({ status: 200, body: allOrder });
+    return res.status(200).json({ success: true, body: allOrder });
   } catch (error) {
     console.log(error);
     return res.status(404).json(error);

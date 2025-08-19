@@ -44,7 +44,7 @@ const LoginForm = (props) => {
       body: JSON.stringify(values),
     });
     const res = await data.json();
-    if (res.status === 201) {
+    if (res.success) {
       LoginValidation();
       toast.success("Please wait...", {
         position: "top-center",

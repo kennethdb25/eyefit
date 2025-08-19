@@ -1,17 +1,24 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable no-unused-vars */
 import React, { useState, useContext, useEffect } from "react";
-import { Form, Table, Tag, message, Button, Popconfirm } from "antd";
-import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { Table, Tag, message, Button, Popconfirm } from "antd";
+import { ReloadOutlined, DatabaseOutlined } from "@ant-design/icons";
 import { LoginContext } from "../../context/LoginContext";
 import moment from "moment";
 import ViewAppointmentModal from "../components/ViewAppointmentModal";
+import Papa from "papaparse";
+import dayjs from "dayjs";
+import GenerateReportModal from "../components/GenerateReportModal";
 
 const Appointments = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isGenerateModalVisible, setGenerateModalVisible] = useState(false);
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [dataRecord, setDataRecord] = useState();
 
   const { loginData, setLoginData } = useContext(LoginContext);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const fetchData = async () => {
     setLoading(true); // Start loading
@@ -32,7 +39,7 @@ const Appointments = () => {
     setLoading(true);
 
     if (status === "Pending") {
-      message.warning("Please select a valid status.");
+      messageApi.warning("Please select a valid status.");
       return;
     }
 
@@ -52,7 +59,7 @@ const Appointments = () => {
       }
       await fetchData();
       setIsModalVisible(false);
-      message.success(`Appointment ${status} successfully`);
+      messageApi.success(`Appointment ${status} successfully`);
     } catch (error) {
       message.error(error.message);
     } finally {
@@ -67,7 +74,7 @@ const Appointments = () => {
 
   const cancel = (e) => {
     console.log(e);
-    message.error("Click on No");
+    messageApi.error("Click on No");
   };
 
   const columns = [
@@ -185,6 +192,82 @@ const Appointments = () => {
     },
   ];
 
+  const appointmentFields = [
+    { label: "Appointment ID", value: "_id" },
+    { label: "Customer Name", value: "customerName" },
+    { label: "Address", value: "address" },
+    { label: "Gender", value: "gender" },
+    { label: "Age", value: "age" },
+    { label: "Order", value: "order" },
+    { label: "Appointment Date", value: "date" },
+    { label: "Appointment Time", value: "time" },
+    { label: "Status", value: "status" },
+    { label: "Company", value: "company" },
+    { label: "Created Date", value: "createdAt" },
+  ];
+
+  const handleGenerateReport = async ({ dateRange, fields }) => {
+    try {
+      let filteredData = [...data];
+
+      if (!filteredData || filteredData.length === 0) {
+        messageApi.info("No data available to generate report.");
+        return;
+      }
+
+      // Filter by date range
+      if (dateRange && dateRange.length === 2) {
+        const [start, end] = dateRange;
+        console.log(filteredData);
+        filteredData = filteredData.filter((item) => {
+          const createdAt = dayjs(item.createdAt);
+          return (
+            createdAt?.isSameOrAfter(start, "day") &&
+            createdAt?.isSameOrBefore(end, "day")
+          );
+        });
+      }
+
+      // Make sure we have fields
+      if (!fields || fields.length === 0) {
+        messageApi.info("Please select at least one field for the report.");
+        return;
+      }
+
+      // Pick only selected fields
+      const reportData = filteredData.map((item) => {
+        const obj = {};
+        fields.forEach((field) => {
+          obj[field] = item[field] ?? ""; // fallback empty string if missing
+        });
+        return obj;
+      });
+
+      if (reportData.length === 0) {
+        messageApi.info("No records found for the selected filters.");
+        return;
+      }
+
+      // Convert to CSV
+      const csv = Papa.unparse(reportData);
+
+      // Trigger download
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${moment().format().split("T")[0]}-appointment-report.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
+
   const acceptedCount = data.filter(
     (item) => item.status === "Accepted"
   ).length;
@@ -199,6 +282,7 @@ const Appointments = () => {
 
   return (
     <main className="main-container">
+      {contextHolder}
       <div className="main-title">
         <h3>APPOINTMENTS</h3>
       </div>
@@ -249,6 +333,14 @@ const Appointments = () => {
           </div>
           <div className="action-buttons">
             <Button
+              icon={<DatabaseOutlined style={{ fontSize: "16px" }} />}
+              onClick={() => setGenerateModalVisible(true)}
+              type="primary"
+              style={{ marginBottom: 16 }}
+            >
+              Generate Report
+            </Button>
+            <Button
               icon={<ReloadOutlined style={{ fontSize: "16px" }} />}
               onClick={fetchData}
               loading={loading}
@@ -274,6 +366,13 @@ const Appointments = () => {
           onClose={() => setIsModalVisible(false)}
           appointment={dataRecord}
           handleUpdateStatus={handleUpdateStatus}
+        />
+
+        <GenerateReportModal
+          visible={isGenerateModalVisible}
+          onClose={() => setGenerateModalVisible(false)}
+          onGenerate={handleGenerateReport}
+          availableFields={appointmentFields}
         />
       </div>
     </main>

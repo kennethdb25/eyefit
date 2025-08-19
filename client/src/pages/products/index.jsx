@@ -1,13 +1,25 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useState, useContext, useEffect } from "react";
-import { Form, Table, Tag, message, Button, Popconfirm } from "antd";
+import { useState, useContext, useEffect } from "react";
+import { Form, Table, Tag, message, Button } from "antd";
 import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
 import AddProductModal from "../components/AddProductModal";
+import GenerateReportModal from "../components/GenerateReportModal";
 import { LoginContext } from "../../context/LoginContext";
 import { DatabaseOutlined } from "@ant-design/icons";
+import Papa from "papaparse";
+import dayjs from "dayjs";
+import moment from "moment";
+
+import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
+import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+
+dayjs.extend(isSameOrAfter);
+dayjs.extend(isSameOrBefore);
 
 const Products = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isGenerateModalVisible, setGenerateModalVisible] = useState(false);
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,6 +28,7 @@ const Products = () => {
   const [fileList, setFileList] = useState([]);
 
   const { loginData, setLoginData } = useContext(LoginContext);
+  const [messageApi, contextHolder] = message.useMessage();
 
   const fetchData = async () => {
     setLoading(true); // Start loading
@@ -50,15 +63,6 @@ const Products = () => {
     setIsEdit(false);
     setIsModalVisible(false);
     setFileList([]);
-  };
-
-  const confirm = (e) => {
-    console.log(e);
-    message.success("Click on Yes");
-  };
-  const cancel = (e) => {
-    console.log(e);
-    message.error("Click on No");
   };
 
   const columns = [
@@ -139,22 +143,86 @@ const Products = () => {
             >
               EDIT
             </button>
-            {/* <Popconfirm
-              title="Delete Product"
-              description="Are you sure to delete this product?"
-              onConfirm={() => confirm()}
-              onCancel={() => cancel()}
-              okText="Yes"
-              cancelText="No"
-            >
-              <button className="delete-button">DELETE</button>
-            </Popconfirm> */}
           </div>
         </>
       ),
     },
   ];
 
+  const productFields = [
+    { label: "Product ID", value: "_id" },
+    { label: "Product Name", value: "productName" },
+    { label: "Brand", value: "brand" },
+    { label: "Model", value: "model" },
+    { label: "Price", value: "price" },
+    { label: "Stocks", value: "stocks" },
+    { label: "Company", value: "company" },
+    { label: "Rating", value: "rating" },
+    { label: "Status", value: "status" },
+    { label: "Created Date", value: "createdAt" },
+  ];
+
+  const handleGenerateReport = async ({ dateRange, fields }) => {
+    try {
+      let filteredData = [...data];
+
+      if (!filteredData || filteredData.length === 0) {
+        messageApi.info("No data available to generate report.");
+        return;
+      }
+
+      // Filter by date range
+      if (dateRange && dateRange.length === 2) {
+        const [start, end] = dateRange;
+        console.log(filteredData);
+        filteredData = filteredData.filter((item) => {
+          const createdAt = dayjs(item.createdAt);
+          return (
+            createdAt?.isSameOrAfter(start, "day") &&
+            createdAt?.isSameOrBefore(end, "day")
+          );
+        });
+      }
+
+      // Make sure we have fields
+      if (!fields || fields.length === 0) {
+        messageApi.info("Please select at least one field for the report.");
+        return;
+      }
+
+      // Pick only selected fields
+      const reportData = filteredData.map((item) => {
+        const obj = {};
+        fields.forEach((field) => {
+          obj[field] = item[field] ?? ""; // fallback empty string if missing
+        });
+        return obj;
+      });
+
+      if (reportData.length === 0) {
+        messageApi.info("No records found for the selected filters.");
+        return;
+      }
+
+      // Convert to CSV
+      const csv = Papa.unparse(reportData);
+
+      // Trigger download
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${moment().format().split("T")[0]}-product-report.csv`
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Fetch failed:", error);
+    }
+  };
   const inStockCount = data.filter((item) => item.status === "In Stock").length;
   const outOfStockCount = data.filter(
     (item) => item.status === "Out of Stock"
@@ -164,10 +232,7 @@ const Products = () => {
   ).length;
 
   const onConfirm = () => {
-    // console.log("New Product:", product);
-    // message.success("Product added successfully!");
     form.submit();
-    // You can now POST to your backend or update state
   };
 
   useEffect(() => {
@@ -176,6 +241,7 @@ const Products = () => {
 
   return (
     <main className="main-container">
+      {contextHolder}
       <div className="main-title">
         <h3>PRODUCTS</h3>
       </div>
@@ -227,7 +293,7 @@ const Products = () => {
           <div className="action-buttons">
             <Button
               icon={<DatabaseOutlined style={{ fontSize: "16px" }} />}
-              onClick={() => showAddModal()}
+              onClick={() => setGenerateModalVisible(true)}
               type="primary"
               style={{ marginBottom: 16 }}
             >
@@ -274,6 +340,13 @@ const Products = () => {
         setIsModalVisible={setIsModalVisible}
         fileList={fileList}
         setFileList={setFileList}
+      />
+
+      <GenerateReportModal
+        visible={isGenerateModalVisible}
+        onClose={() => setGenerateModalVisible(false)}
+        onGenerate={handleGenerateReport}
+        availableFields={productFields}
       />
     </main>
   );

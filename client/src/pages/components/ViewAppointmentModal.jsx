@@ -1,6 +1,4 @@
-import React from "react";
-import { Modal, Form, Input, Button, Select, Switch } from "antd";
-import dayjs from "dayjs";
+import { Modal, Form, Input, Button, Select } from "antd";
 import moment from "moment";
 
 const { Option } = Select;

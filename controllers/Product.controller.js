@@ -53,7 +53,7 @@ const AddProduct = async (req, res) => {
 
     const storeRecord = await finalRecord.save();
 
-    res.status(200).json({ status: 200, body: storeRecord });
+    res.status(200).json({ success: true, body: storeRecord });
   } catch (error) {
     console.log(error);
     res.status(400).json({ error: error.message });
@@ -133,7 +133,7 @@ const EditProduct = async (req, res) => {
     });
 
     const updatedProduct = await product.save();
-    res.status(200).json({ status: 200, body: updatedProduct });
+    res.status(200).json({ success: true, body: updatedProduct });
   } catch (error) {
     console.log(error);
     res.status(400).json({ error: error.message });
@@ -144,7 +144,7 @@ const GetAllProductByCompany = async (req, res) => {
   const company = req.query.company || "";
   try {
     const product = await ProductModel.find({ company });
-    res.status(200).json({ status: 200, body: product });
+    res.status(200).json({ success: true, body: product });
   } catch (error) {
     console.log(error);
     res.status(400).json({ error: error.message });

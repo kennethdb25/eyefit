@@ -31,7 +31,7 @@ const UserProfileModal = ({ user, isVisible, onClose, setData }) => {
 
     const data = await res.json();
 
-    if (data.status === 201) {
+    if (data.success) {
       setData(false);
       setTimeout(() => {
         localStorage.removeItem("accountToken");
@@ -73,49 +73,6 @@ const UserProfileModal = ({ user, isVisible, onClose, setData }) => {
   return (
     <>
       {
-        /* <Modal
-        title="USER PROFILE"
-        open={isVisible}
-        onCancel={onClose}
-        footer={[
-          <Button type="primary" key="close" onClick={onClose}>
-            CLOSE
-          </Button>,
-          <Button
-            type="primary"
-            icon={<PoweroffOutlined />}
-            danger
-            key="close"
-            onClick={() => enterLoading(5)}
-            loading={
-              loadings[5] && {
-                icon: <SyncOutlined spin />,
-              }
-            }
-          >
-            LOGOUT
-          </Button>,
-        ]}
-      >
-        <div style={{ textAlign: "center" }}>
-          <ToastContainer />
-          <Avatar size={100} icon={<UserOutlined />} />
-          <Title level={4} style={{ marginTop: 10 }}>
-            {user?.name || "John Doe"}
-          </Title>
-        </div>
-        <Descriptions bordered column={1}>
-          <Descriptions.Item label="Contact Number">
-            {user?.contact}
-          </Descriptions.Item>
-          <Descriptions.Item label="Email">{user?.email}</Descriptions.Item>
-          <Descriptions.Item label="Address">{user?.address}</Descriptions.Item>
-          <Descriptions.Item label="User Type">{user?.user}</Descriptions.Item>
-          <Descriptions.Item label="Account Status">
-            {user?.acctStatus}
-          </Descriptions.Item>
-        </Descriptions>
-      </Modal> */
         <Modal
           title="USER PROFILE"
           open={isVisible}
@@ -145,7 +102,7 @@ const UserProfileModal = ({ user, isVisible, onClose, setData }) => {
           <div style={{ textAlign: "center", marginBottom: 24 }}>
             <Avatar size={100} icon={<UserOutlined />} />
             <Title level={4} style={{ marginTop: 12 }}>
-              {user?.name || "John Doe"}
+              {user?.name.toUpperCase() || "John Doe"}
             </Title>
           </div>
 
@@ -165,7 +122,7 @@ const UserProfileModal = ({ user, isVisible, onClose, setData }) => {
               {user?.address || "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="User Type">
-              {user?.user || "N/A"}
+              {user?.user.toUpperCase() || "N/A"}
             </Descriptions.Item>
             <Descriptions.Item label="Account Status">
               {user?.acctStatus || "N/A"}

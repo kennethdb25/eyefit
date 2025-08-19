@@ -42,7 +42,7 @@ const AccountLogin = async (req, res) => {
           userEmail,
           token,
         };
-        return res.status(201).json({ status: 201, result });
+        return res.status(201).json({ success: true, result });
       }
     } else {
       return res.status(401).json({ body: "Invalid Email or Password" });
@@ -61,7 +61,7 @@ const AccountLogout = async (req, res) => {
 
     req.rootUser.save();
 
-    return res.status(201).json({ status: 201 });
+    return res.status(201).json({ success: true });
   } catch (error) {
     console.log(error);
   }
@@ -89,21 +89,28 @@ const AccountSignup = async (req, res) => {
     password,
   } = req.body;
 
+  console.log(req.body)
+
   try {
     const validate = await AccountModel.findOne({ email });
 
-    const validateCompany = await AccountModel.findOne({ company });
+    if (userType !== "ADMIN USER") {
+      const validateCompany = await AccountModel.findOne({ company });
 
-    if (validate || validateCompany) {
-      return res.status(422).json({ error: "Account Already Exists" });
+      if (validate || validateCompany) {
+        return res.status(422).json({ error: "Account Already Exists" });
+      }
     }
 
+    if (validate) {
+      return res.status(422).json({ error: "Account Already Exists" });
+    }
     const userDetails = new AccountModel({
       firstName: firstName.toUpperCase(),
       middleName: middleName.toUpperCase(),
       lastName: lastName.toUpperCase(),
       address: address.toUpperCase(),
-      company: company.toUpperCase(),
+      company: company ? company.toUpperCase() : "ADMIN USER",
       contact,
       userType: userType ? userType : "USER",
       password,
@@ -113,7 +120,7 @@ const AccountSignup = async (req, res) => {
       email,
     });
     const data = await userDetails.save();
-    return res.status(200).json({ status: 200, body: data });
+    return res.status(200).json({ success: true, body: data });
   } catch (error) {
     console.log(error);
     return res.status(422).json(error);
@@ -128,7 +135,7 @@ const ForgotPasswordVerifyEmail = async (req, res) => {
     });
     if (getEmail) {
       return res.status(200).json({
-        status: 200,
+        success: true,
         body: "Email Matched. Please click send button for OTP",
       });
     } else {
@@ -165,13 +172,65 @@ const ForgotPasswordUpdatePassword = async (req, res) => {
 
     return res
       .status(200)
-      .json({ status: 200, body: "Recovered Successfully" });
+      .json({ success: true, body: "Recovered Successfully" });
   } catch (error) {
     return res.status(404).json(error);
   }
 };
 
-const AccountLoginHistory = async (req, res) => {};
+const GetAllAccountUser = async (req, res) => {
+  try {
+    const allAccountUser = await AccountModel.find();
+
+    return res
+      .status(200)
+      .json({ success: true, body: allAccountUser });
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+}
+
+const EditAccount = async (req, res) => {
+  try {
+    const id = req.query.userId || "";
+
+    const {
+      firstName,
+      middleName,
+      lastName,
+      company,
+      address,
+      email,
+      contact,
+      acctStatus,
+    } = req.body;
+
+    const userAcount = await AccountModel.findOne({ _id: id })
+
+    if (!userAcount) {
+      return res.status(404).json({ error: "User Account not found." });
+    }
+
+    Object.assign(userAcount, {
+      firstName,
+      middleName,
+      lastName,
+      company,
+      address,
+      email,
+      contact,
+      acctStatus,
+    });
+
+    const updateAccount = await userAcount.save();
+    res.status(200).json({ success: true, body: updateAccount });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+const AccountLoginHistory = async (req, res) => { };
 
 module.exports = {
   AccountSignup,
@@ -180,4 +239,6 @@ module.exports = {
   AccountLogin,
   AccountValidate,
   AccountLogout,
+  GetAllAccountUser,
+  EditAccount
 };

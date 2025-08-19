@@ -23,7 +23,7 @@ const AccountLogin = (props) => {
 
     const res = await data.json();
 
-    if (res.status === 200) {
+    if (res.success) {
       message.success("Registration Successfully Completed");
       onClose();
       form.resetFields();

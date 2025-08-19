@@ -7,6 +7,8 @@ const {
   AccountLogin,
   AccountValidate,
   AccountLogout,
+  GetAllAccountUser,
+  EditAccount
 } = require("../controllers/Account.controller");
 const ValidateAccount = require("../middlewares/Authenticate");
 
@@ -33,5 +35,9 @@ AccountRouter.patch(
   ForgotPasswordUpdatePassword
 );
 // --------------- **** -------------- //
+
+AccountRouter.get("/api/user/accounts", GetAllAccountUser);
+
+AccountRouter.put("/api/user/account/edit", EditAccount);
 
 module.exports = AccountRouter;

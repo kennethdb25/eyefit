@@ -19,7 +19,7 @@ const AddAnAppointment = async (req, res) => {
     const savedAppointment = await appointment.save();
 
     res.status(201).json({
-      status: 200,
+      success: true,
       data: savedAppointment,
     });
   } catch (error) {
@@ -36,7 +36,7 @@ const GetAllAppointmentPerCompany = async (req, res) => {
 
     const allAppointments = await AppointmentModel.find({ company });
 
-    return res.status(200).json({ status: 200, body: allAppointments });
+    return res.status(200).json({ success: true, body: allAppointments });
   } catch (error) {
     console.log(error);
     return res.status(404).json(error);
