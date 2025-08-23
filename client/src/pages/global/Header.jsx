@@ -150,7 +150,7 @@ function Header({ OpenSidebar, setData }) {
           <BellOutlined
             className="icon"
             onClick={() => setOpen(true)}
-            style={{ fontSize: 20, cursor: "pointer", color: "white" }}
+            style={{ fontSize: 20, cursor: "pointer", color: "black" }}
             aria-label="Open notifications"
             role="button"
           />

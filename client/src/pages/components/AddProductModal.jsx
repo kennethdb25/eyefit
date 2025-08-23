@@ -10,6 +10,8 @@ import {
   Button,
   Upload,
   message,
+  Row,
+  Col,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { useState, useContext, useEffect } from "react";
@@ -160,100 +162,144 @@ const AddProductModal = ({
           width: "100%",
         }}
       >
-        <Form.Item
-          name="productName"
-          label="Product Name"
-          rules={[
-            { required: true, message: "Please enter the product name" },
-            { max: 40, message: "Name can not exceed 40 characters" },
-          ]}
-        >
-          <Input />
-        </Form.Item>
+        <Row>
+          <Col xs={{ span: 24 }} md={{ span: 24 }}>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item
+                  name="productName"
+                  label="Product Name"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter the product name",
+                    },
+                    { max: 40, message: "Name can not exceed 40 characters" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Product Image" name="images" required>
+                  <Upload
+                    listType="picture"
+                    beforeUpload={(file) => {
+                      const isImage = file.type.startsWith("image/");
+                      if (!isImage) {
+                        message.error("You can only upload image files!");
+                      }
+                      return isImage ? false : Upload.LIST_IGNORE; // prevent auto-upload and ignore non-images
+                    }}
+                    accept="image/*"
+                    fileList={fileList}
+                    onChange={handleUploadChange}
+                    maxCount={10}
+                  >
+                    <Button icon={<UploadOutlined />}>Click to Upload</Button>
+                  </Upload>
+                </Form.Item>
+              </Col>
+            </Row>
 
-        <Form.Item label="Product Image" name="images" required>
-          <Upload
-            listType="picture"
-            beforeUpload={(file) => {
-              const isImage = file.type.startsWith("image/");
-              if (!isImage) {
-                message.error("You can only upload image files!");
-              }
-              return isImage ? false : Upload.LIST_IGNORE; // prevent auto-upload and ignore non-images
-            }}
-            accept="image/*"
-            fileList={fileList}
-            onChange={handleUploadChange}
-            maxCount={10}
-          >
-            <Button icon={<UploadOutlined />}>Click to Upload</Button>
-          </Upload>
-        </Form.Item>
-
-        <Form.Item
-          name="brand"
-          label="Brand"
-          rules={[
-            { required: true, message: "Please enter the brand" },
-            { max: 40, message: "Brand can not exceed 40 characters" },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="model"
-          label="Model"
-          rules={[
-            { required: true, message: "Please enter the model" },
-            { max: 40, message: "Model can not exceed 40 characters" },
-          ]}
-        >
-          <Input />
-        </Form.Item>
-
-        <Form.Item
-          name="price"
-          label="Price"
-          rules={[{ required: true, message: "Please enter the price" }]}
-        >
-          <InputNumber min={0} prefix="Php" style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="stocks"
-          label="Stocks"
-          rules={[{ required: true, message: "Please enter stock quantity" }]}
-        >
-          <InputNumber min={0} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item name="featured" label="Featured" valuePropName="checked">
-          <Switch defaultChecked />
-        </Form.Item>
-
-        <Form.Item
-          name="rating"
-          label="Rating"
-          initialValue={5}
-          rules={[
-            { type: "number", min: 0, max: 5, message: "Rating must be 0–5" },
-          ]}
-        >
-          <InputNumber step={0.1} min={0} max={5} style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          name="status"
-          label="Status"
-          rules={[{ required: true, message: "Please select status" }]}
-        >
-          <Select placeholder="Select status">
-            <Option value="In Stock">In Stock</Option>
-            <Option value="Out of Stock">Out of Stock</Option>
-            <Option value="Discontinued">Discontinued</Option>
-          </Select>
-        </Form.Item>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item
+                  name="brand"
+                  label="Brand"
+                  rules={[
+                    { required: true, message: "Please enter the brand" },
+                    { max: 40, message: "Brand can not exceed 40 characters" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item
+                  name="model"
+                  label="Model"
+                  rules={[
+                    { required: true, message: "Please enter the model" },
+                    { max: 40, message: "Model can not exceed 40 characters" },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item
+                  name="price"
+                  label="Price"
+                  rules={[
+                    { required: true, message: "Please enter the price" },
+                  ]}
+                >
+                  <InputNumber min={0} prefix="Php" style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item
+                  name="stocks"
+                  label="Stocks"
+                  rules={[
+                    { required: true, message: "Please enter stock quantity" },
+                  ]}
+                >
+                  <InputNumber min={0} style={{ width: "100%" }} />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item
+                  name="featured"
+                  label="Featured"
+                  valuePropName="checked"
+                >
+                  <Switch defaultChecked />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item
+                  name="rating"
+                  label="Rating"
+                  initialValue={5}
+                  rules={[
+                    {
+                      type: "number",
+                      min: 0,
+                      max: 5,
+                      message: "Rating must be 0–5",
+                    },
+                  ]}
+                >
+                  <InputNumber
+                    step={0.1}
+                    min={0}
+                    max={5}
+                    style={{ width: "100%" }}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item
+                  name="status"
+                  label="Status"
+                  rules={[{ required: true, message: "Please select status" }]}
+                >
+                  <Select placeholder="Select status">
+                    <Option value="In Stock">In Stock</Option>
+                    <Option value="Out of Stock">Out of Stock</Option>
+                    <Option value="Discontinued">Discontinued</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </Form>
     </Modal>
   );

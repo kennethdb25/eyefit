@@ -1,4 +1,4 @@
-import { Modal, Form, Input, Button, Select } from "antd";
+import { Modal, Form, Input, Button, Select, Row, Col } from "antd";
 import moment from "moment";
 
 const { Option } = Select;
@@ -23,6 +23,7 @@ const ViewAppointmentModal = ({
     <Modal
       title="Appointment Details"
       open={isVisible}
+      width={1200}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={() => onClose()} style={buttonStyle}>
@@ -70,61 +71,107 @@ const ViewAppointmentModal = ({
       ]}
     >
       <Form layout="vertical">
-        <Form.Item label="Customer Name">
-          <Input
-            value={appointment?.customerName}
-            disabled
-            style={inputStyle}
-          />
-        </Form.Item>
+        <Row>
+          <Col xs={{ span: 24 }} md={{ span: 24 }}>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Customer Name">
+                  <Input
+                    value={appointment?.customerName}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Address">
+                  <Input
+                    value={appointment?.address}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
 
-        <Form.Item label="Address">
-          <Input value={appointment?.address} disabled style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item label="Gender">
-          <Select value={appointment?.gender} disabled>
-            <Option value="Male">Male</Option>
-            <Option value="Female">Female</Option>
-            <Option value="Other">Other</Option>
-          </Select>
-        </Form.Item>
-
-        <Form.Item label="Age">
-          <Input value={appointment?.age} disabled style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item label="Order">
-          <Input value={appointment?.order} disabled style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item label="Date">
-          <Input
-            value={moment(appointment?.date).format("LL")}
-            disabled
-            style={inputStyle}
-          />
-        </Form.Item>
-
-        <Form.Item label="Time">
-          <Input value={appointment?.time} disabled style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item label="Status">
-          <Input value={appointment?.status} disabled style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item label="Company">
-          <Input value={appointment?.company} disabled style={inputStyle} />
-        </Form.Item>
-
-        <Form.Item label="Created At">
-          <Input
-            value={moment(appointment?.createdAt).format("LL")}
-            disabled
-            style={inputStyle}
-          />
-        </Form.Item>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item label="Gender">
+                  <Select value={appointment?.gender} disabled>
+                    <Option value="Male">Male</Option>
+                    <Option value="Female">Female</Option>
+                    <Option value="Other">Other</Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item label="Age">
+                  <Input value={appointment?.age} disabled style={inputStyle} />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item label="Created At">
+                  <Input
+                    value={moment(appointment?.createdAt).format("LL")}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 24 }} layout="vertical">
+                <Form.Item label="Order">
+                  <Input
+                    value={appointment?.order}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Date">
+                  <Input
+                    value={moment(appointment?.date).format("LL")}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Time">
+                  <Input
+                    value={appointment?.time}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Status">
+                  <Input
+                    value={appointment?.status}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+                <Form.Item label="Company">
+                  <Input
+                    value={appointment?.company}
+                    disabled
+                    style={inputStyle}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
       </Form>
     </Modal>
   );
