@@ -28,7 +28,11 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
     >
       <div className="sidebar-title">
         <div className="sidebar-brand">
-          <img style={{ width: "150px", height: "150px" }} src="/icon.png" />{" "}
+          <img
+            style={{ width: "150px", height: "150px" }}
+            src="/icon.png"
+            alt="icon_sidebar"
+          />
         </div>
         <span className="icon close_icon" onClick={OpenSidebar}>
           X
