@@ -13,6 +13,7 @@ import moment from "moment";
 
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
+import { Pagination } from "../components/Pagination/Pagination";
 
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
@@ -324,6 +325,7 @@ const Products = () => {
           dataSource={data}
           columns={columns}
           loading={loading}
+          pagination={Pagination({ data: data })}
           rowKey="_id"
         />
       </div>

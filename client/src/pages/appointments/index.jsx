@@ -9,6 +9,7 @@ import ViewAppointmentModal from "../components/ViewAppointmentModal";
 import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
+import { Pagination } from "../components/Pagination/Pagination";
 
 const Appointments = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -357,6 +358,7 @@ const Appointments = () => {
           dataSource={data}
           columns={columns}
           loading={loading}
+          pagination={Pagination({ data: data })}
           rowKey="_id"
         />
 

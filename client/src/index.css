@@ -231,7 +231,27 @@ code {
 }
 
 .ant-pagination-item-link {
-  color: white !important;
+  color: black !important;
+}
+/* change previous button color */
+.ant-pagination-prev .ant-pagination-item-link {
+  background-color: #1890ff; /* blue */
+  color: black;
+  border-radius: 8px;
+}
+
+/* change next button color */
+.ant-pagination-next .ant-pagination-item-link {
+  background-color: #52c41a; /* green */
+  color: black;
+  border-radius: 8px;
+}
+
+/* optional hover effect */
+.ant-pagination-prev:hover .ant-pagination-item-link,
+.ant-pagination-next:hover .ant-pagination-item-link {
+  background-color: #faad14; /* orange on hover */
+  color: black;
 }
 
 /* buttons */

@@ -14,6 +14,7 @@ import ViewOrderModal from "../components/ViewOrderModal";
 import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
+import { Pagination } from "../components/Pagination/Pagination";
 
 const Orders = () => {
   const [data, setData] = useState([]);
@@ -536,6 +537,7 @@ const Orders = () => {
           dataSource={data}
           columns={columns}
           loading={loading}
+          pagination={Pagination({ data: data })}
           rowKey="_id"
         />
       </div>

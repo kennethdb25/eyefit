@@ -9,6 +9,7 @@ import ViewInventoryModal from "../components/ViewInventoryModal";
 import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
+import { Pagination } from "../components/Pagination/Pagination";
 
 const Inventory = () => {
   const [data, setData] = useState([]);
@@ -368,6 +369,7 @@ const Inventory = () => {
           dataSource={data}
           columns={columns}
           loading={loading}
+          pagination={Pagination({ data: data })}
           rowKey="_id"
         />
       </div>

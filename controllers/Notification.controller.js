@@ -3,8 +3,9 @@ const NotificationModel = require('../models/NotificationModel');
 const GetNotificationPerCompany = async (req, res) => {
     try {
         const company = req.query.company || "";
+        const limit = 10;
 
-        const notifs = await NotificationModel.find({ company }).sort({ createdAt: -1 }) || [];
+        const notifs = await NotificationModel.find({ company }).sort({ createdAt: -1 }).limit(limit) || [];
 
         return res.status(200).json({ success: true, body: notifs });
     } catch (error) {
