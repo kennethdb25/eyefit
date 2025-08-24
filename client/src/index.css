@@ -82,8 +82,8 @@ code {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 30px 0px 30px;
-  margin-bottom: 30px;
+  padding: 0px 30px 0px 50px;
+  /* margin-bottom: 30px; */
 }
 
 .sidebar-title > span {
@@ -91,9 +91,9 @@ code {
 }
 
 .sidebar-brand {
-  margin-top: 15px;
-  font-size: 20px;
-  font-weight: 700;
+  /* margin-top: 5px; */
+  /* font-size: 20px; */
+  /* font-weight: 700; */
 }
 
 .sidebar-list {

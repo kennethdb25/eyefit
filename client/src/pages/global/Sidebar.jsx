@@ -28,7 +28,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
     >
       <div className="sidebar-title">
         <div className="sidebar-brand">
-          <BsEyeglasses className="icon_header" /> EYEFIT
+          <img style={{ width: "150px", height: "150px" }} src="/icon.png" />{" "}
         </div>
         <span className="icon close_icon" onClick={OpenSidebar}>
           X
