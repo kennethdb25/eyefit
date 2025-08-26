@@ -151,4 +151,15 @@ const GetAllProductByCompany = async (req, res) => {
   }
 };
 
-module.exports = { AddProduct, EditProduct, GetAllProductByCompany };
+// User End point
+const GetAvailableProduct = async (req, res) => {
+  try {
+    const getAvailableProduct = await ProductModel.find({ status: { $nin: ['Discontinued'] } });
+    res.status(200).json({ success: true, body: getAvailableProduct });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { AddProduct, EditProduct, GetAllProductByCompany, GetAvailableProduct };

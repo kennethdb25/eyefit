@@ -257,7 +257,7 @@ const AddProductModal = ({
                   label="Featured"
                   valuePropName="checked"
                 >
-                  <Switch defaultChecked />
+                  <Switch defaultChecked defaultValue={true} />
                 </Form.Item>
               </Col>
             </Row>

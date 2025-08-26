@@ -23,21 +23,6 @@ const AccountLogin = async (req, res) => {
           httpOnly: true,
         });
 
-        // const { _id, firstName, middleName, lastName, userType, email } =
-        //   userEmail;
-
-        // const loginHistoryDetails = new LoginHistoryModel({
-        //   userId: _id.toString(),
-        //   firstName,
-        //   middleName,
-        //   lastName,
-        //   userType,
-        //   created: new Date().toISOString(),
-        //   email,
-        // });
-
-        // await loginHistoryDetails.save();
-
         const result = {
           userEmail,
           token,

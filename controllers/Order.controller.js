@@ -4,6 +4,7 @@ const OrderModel = require("../models/OrderModel");
 const InventoryModel = require("../models/InventoryModel");
 const DeliveryModel = require("../models/DeliverModel");
 const NotificationModel = require("../models/NotificationModel");
+const CheckOutModel = require("../models/CheckoutModel");
 
 // const { BadRequest } = require("../utils/httpError");
 
@@ -204,4 +205,96 @@ const UpdateOrderStatus = async (req, res) => {
   }
 };
 
-module.exports = { AddOrder, GetAllOrderPerCompany, UpdateOrderStatus };
+// USER API
+
+const AddCheckOut = async (req, res) => {
+  const { userId, productId } = req.body;
+  try {
+    // check if user id and product are valid
+    const validateUser = await UserModel.findById(userId);
+
+    const validateProduct = await ProductModel.findById(productId);
+
+    if (!validateProduct) {
+      return res
+        .status(404)
+        .json({ message: `Product ${productId} not found` });
+    }
+
+    if (!validateUser) {
+      return res
+        .status(404)
+        .json({ message: `User ${userId} not found` });
+    }
+
+    const finalCheckout = await new CheckOutModel({
+      user: userId,
+      product: productId,
+    });
+
+    const storeRecord = await finalCheckout.save();
+
+    res.status(200).json({ success: true, body: storeRecord });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+const GetAllCheckoutPerUser = async (req, res) => {
+  try {
+    const userId = req.query.userId || "";
+
+    if (!userId) {
+      return res
+        .status(404)
+        .json({ message: `User ${userId} not found` });
+    }
+
+    const allCheckout = await CheckOutModel.find({ user: userId })
+      .populate("user") // optional: if you also want full user data
+      .populate("product"); // <-- this populates product details
+
+
+    return res.status(200).json({ success: true, body: allCheckout });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+}
+
+const RemoveCheckout = async (req, res) => {
+  try {
+    const id = req.query.checkoutId || "";
+
+    const deleteOne = await CheckOutModel.findByIdAndDelete(id);
+
+    if (deleteOne.deletedCount === 0) {
+      return res.status(404).json({ message: "No records found for this user." });
+    }
+
+    return res.status(200).json({ success: true, message: `Deleted ${deleteOne.deletedCount} record.`, });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+}
+
+const RemoveAllCheckoutPerUser = async (req, res) => {
+  try {
+    const userId = req.query.userId || "";
+
+    const deleteAll = await CheckOutModel.deleteMany({ user: userId });
+
+    if (deleteAll.deletedCount === 0) {
+      return res.status(404).json({ message: "No records found for this user." });
+    }
+
+    return res.status(200).json({ success: true, message: `Deleted ${deleteAll.deletedCount} records for user ${userId}.`, });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+}
+
+module.exports = { AddOrder, GetAllOrderPerCompany, UpdateOrderStatus, AddCheckOut, GetAllCheckoutPerUser, RemoveCheckout, RemoveAllCheckoutPerUser };

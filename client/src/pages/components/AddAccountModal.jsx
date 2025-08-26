@@ -26,9 +26,7 @@ const AddAccountModal = ({
         body: JSON.stringify(values),
       });
 
-      console.log(values);
       const res = await newData.json();
-      console.log(res);
 
       if (res.success) {
         messageApi.success("Account Added Successfully");

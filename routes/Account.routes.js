@@ -10,7 +10,7 @@ const {
   GetAllAccountUser,
   EditAccount
 } = require("../controllers/Account.controller");
-const ValidateAccount = require("../middlewares/Authenticate");
+const { ValidateAccount } = require("../middlewares/Authenticate");
 
 // LOGIN AND VALIDATE //
 AccountRouter.post("/api/user/login", AccountLogin);
