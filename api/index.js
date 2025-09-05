@@ -8,12 +8,12 @@ app.use(cors());
 app.use(express.json());
 
 // const uploadRoutes = require("./routes/upload");
-const AccountRouter = require("../routes/Account.routess");
-const ProductRouter = require("../routes/Product.routess");
+const AccountRouter = require("../routes/Account.routes");
+const ProductRouter = require("../routes/Product.routes");
 const AppointmentRouter = require("../routes/Appointment.routes");
-const UserRouter = require("../routes/User.routess");
-const OrderRouter = require("../routes/Order.routess");
-const DeliveryRouter = require(".Account.routess");
+const UserRouter = require("../routes/User.routes");
+const OrderRouter = require("../routes/Order.routes");
+const DeliveryRouter = require(".Account.routes");
 const NotificationRouter = require("../routes/Notification.routes");
 const InventoryRouter = require("../routes/Inventory.routes");
 
@@ -27,8 +27,11 @@ app.use(DeliveryRouter);
 app.use(NotificationRouter);
 app.use(InventoryRouter);
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// const PORT = process.env.PORT || 8080;
+// app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+
+module.exports = app;
 
 // end
 
