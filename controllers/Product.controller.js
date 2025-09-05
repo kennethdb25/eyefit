@@ -14,7 +14,10 @@ const AddProduct = async (req, res) => {
     featured,
     rating,
     status,
+    colors,
   } = req.body;
+
+  const parsedColors = colors ? JSON.parse(colors) : [];
   try {
     const uploadPromises = req.files.map((file) => {
       return new Promise((resolve, reject) => {
@@ -47,6 +50,7 @@ const AddProduct = async (req, res) => {
       featured: featured,
       rating: rating,
       status: status,
+      colors: parsedColors, // ✅ save as array
       productImgURL: uploadedImages[0]?.url,
       productPublicId: uploadedImages[0]?.public_id,
     });
@@ -74,7 +78,13 @@ const EditProduct = async (req, res) => {
       featured,
       rating,
       status,
+      colors,
     } = req.body;
+
+    const parsedColors = colors ? JSON.parse(colors) : [];
+
+    console.log(colors);
+    console.log(parsedColors);
 
     const product = await ProductModel.findOne({ productPublicId: publicId });
     if (!product) {
@@ -130,6 +140,7 @@ const EditProduct = async (req, res) => {
       featured,
       rating,
       status,
+      colors: parsedColors, // ✅ save as array
     });
 
     const updatedProduct = await product.save();

@@ -9,7 +9,7 @@ const CheckOutModel = require("../models/CheckoutModel");
 // const { BadRequest } = require("../utils/httpError");
 
 const AddOrder = async (req, res) => {
-  const { userId, products } = req.body;
+  const { userId, products, paymentMethod } = req.body;
   let previousCompany = null;
 
   try {
@@ -74,6 +74,7 @@ const AddOrder = async (req, res) => {
         product: p.productId,
         quantity: p.quantity,
       })),
+      paymentMethod: paymentMethod === 'otc' ? 'Over the counter' : 'Cash on Delivery',
       company: inventoryProduct[0].company || inventoryProduct.company,
       total: totalAmount,
     });
@@ -177,10 +178,19 @@ const UpdateOrderStatus = async (req, res) => {
         company,
       });
       await newDelivery.save();
+
+      await NotificationModel.create({
+        type: "Shipped Order",
+        orderId: _id,
+        userId: updateOrder?.userId,
+        path: "order",
+        company: company,
+        message: `Order #${updateOrder._id} ship by ${company || "shop"}`
+      });
     }
 
     if (status === "Completed") {
-      const { _id } = updateOrder;
+      const { _id, company } = updateOrder;
 
       const deliveryRecord = await DeliveryModel.findOne({ order: _id });
 
@@ -190,6 +200,17 @@ const UpdateOrderStatus = async (req, res) => {
           { status },
           { new: true }
         );
+
+
+
+        await NotificationModel.create({
+          type: "Completed Order",
+          orderId: _id,
+          userId: updateOrder?.userId,
+          path: "order",
+          company: company,
+          message: `Order #${updateOrder._id} delivered successfully`
+        });
       }
     }
 

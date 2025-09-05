@@ -16,6 +16,7 @@ import {
 import { UploadOutlined } from "@ant-design/icons";
 import { useState, useContext, useEffect } from "react";
 import { LoginContext } from "../../context/LoginContext";
+import ColorInput from "./ColorInput/ColorInput";
 
 const { Option } = Select;
 
@@ -62,6 +63,7 @@ const AddProductModal = ({
       newData.append("rating", values.rating);
       newData.append("status", values.status);
       newData.append("company", loginData.body.company);
+      newData.append("colors", JSON.stringify(values.colors || []));
 
       const data = await fetch(
         `/api/product/edit?publicId=${editingRecord.productPublicId}`,
@@ -100,6 +102,7 @@ const AddProductModal = ({
       newData.append("rating", values.rating);
       newData.append("status", values.status);
       newData.append("company", loginData.body.company);
+      newData.append("colors", JSON.stringify(values.colors || []));
 
       const data = await fetch("/api/product/add", {
         method: "POST",
@@ -262,7 +265,21 @@ const AddProductModal = ({
               </Col>
             </Row>
             <Row gutter={12}>
-              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item
+                  name="colors"
+                  label="Colors"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please add at least one color",
+                    },
+                  ]}
+                >
+                  <ColorInput />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
                 <Form.Item
                   name="rating"
                   label="Rating"
@@ -284,7 +301,7 @@ const AddProductModal = ({
                   />
                 </Form.Item>
               </Col>
-              <Col xs={{ span: 24 }} md={{ span: 12 }} layout="vertical">
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
                 <Form.Item
                   name="status"
                   label="Status"

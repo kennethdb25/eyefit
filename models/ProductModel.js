@@ -14,6 +14,10 @@ const ProductSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  colors: {
+    type: Array,
+    required: true
+  },
   brand: {
     type: String,
     required: [true, "Please provide a brand for the product"],

@@ -5,7 +5,7 @@ const GetNotificationPerCompany = async (req, res) => {
         const company = req.query.company || "";
         const limit = 10;
 
-        const notifs = await NotificationModel.find({ company }).sort({ createdAt: -1 }).limit(limit) || [];
+        const notifs = await NotificationModel.find({ company, type: "New Order" }).sort({ createdAt: -1 }).limit(limit) || [];
 
         return res.status(200).json({ success: true, body: notifs });
     } catch (error) {
