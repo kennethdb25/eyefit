@@ -18,14 +18,14 @@ const NotificationRouter = require("./routes/Notification.routes");
 const InventoryRouter = require("./routes/Inventory.routes");
 
 // app.use("/api", uploadRoutes);
-app.use(AccountRouter);
-app.use(ProductRouter);
-app.use(AppointmentRouter);
-app.use(UserRouter);
-app.use(OrderRouter);
-app.use(DeliveryRouter);
-app.use(NotificationRouter);
-app.use(InventoryRouter);
+app.use("/v1", AccountRouter);
+app.use("/v1", ProductRouter);
+app.use("/v1", AppointmentRouter);
+app.use("/v1", UserRouter);
+app.use("/v1", OrderRouter);
+app.use("/v1", DeliveryRouter);
+app.use("/v1", NotificationRouter);
+app.use("/v1", InventoryRouter);
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
