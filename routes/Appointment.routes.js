@@ -8,6 +8,6 @@ const {
 
 AppointmentRouter.post("/api/appointments/add", AddAnAppointment);
 AppointmentRouter.get("/api/appointments", GetAllAppointmentPerCompany);
-AppointmentRouter.put("/api/appointments/:id/status", UpdateAppointmentStatus);
+AppointmentRouter.put("/api/appointments/status/:id", UpdateAppointmentStatus);
 
 module.exports = AppointmentRouter;

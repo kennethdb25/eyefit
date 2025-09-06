@@ -45,7 +45,7 @@ const Appointments = () => {
     }
 
     try {
-      const response = await fetch(`/api/appointments/${id}/status`, {
+      const response = await fetch(`/api/appointments/status/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
