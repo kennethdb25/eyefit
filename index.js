@@ -1,4 +1,5 @@
 const express = require("express");
+const favicon = require('serve-favicon');
 const path = require("path");
 const cors = require("cors");
 require("./config/database/db.conf");
@@ -6,6 +7,8 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+const PORT = process.env.PORT || 5000;
 
 // const uploadRoutes = require("./routes/upload");
 const AccountRouter = require("./routes/Account.routes");
@@ -30,6 +33,7 @@ app.use(InventoryRouter);
 // module.exports = app;
 // end
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "client/build")));
@@ -39,5 +43,4 @@ if (process.env.NODE_ENV === "production") {
   });
 }
 
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
