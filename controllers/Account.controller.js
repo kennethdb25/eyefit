@@ -112,56 +112,56 @@ const AccountSignup = async (req, res) => {
   }
 };
 
-const ForgotPasswordVerifyEmail = async (req, res) => {
-  try {
-    const getEmail = await AccountModel.findOne({
-      email: req.params.email,
-      userType: "STUDENT",
-    });
-    if (getEmail) {
-      return res.status(200).json({
-        success: true,
-        body: "Email Matched. Please click send button for OTP",
-      });
-    } else {
-      return res
-        .status(422)
-        .json({ status: 422, body: "Email didn't match our records" });
-    }
-  } catch (error) {
-    res.status(404).json(error);
-  }
-};
+// const ForgotPasswordVerifyEmail = async (req, res) => {
+//   try {
+//     const getEmail = await AccountModel.findOne({
+//       email: req.params.email,
+//       userType: "STUDENT",
+//     });
+//     if (getEmail) {
+//       return res.status(200).json({
+//         success: true,
+//         body: "Email Matched. Please click send button for OTP",
+//       });
+//     } else {
+//       return res
+//         .status(422)
+//         .json({ status: 422, body: "Email didn't match our records" });
+//     }
+//   } catch (error) {
+//     res.status(404).json(error);
+//   }
+// };
 
-const ForgotPasswordUpdatePassword = async (req, res) => {
-  console.log(req?.params.email);
+// const ForgotPasswordUpdatePassword = async (req, res) => {
+//   console.log(req?.params.email);
 
-  try {
-    const email = req?.params.email;
-    const password = await cipher.hash(req.body.password, 12);
+//   try {
+//     const email = req?.params.email;
+//     const password = await cipher.hash(req.body.password, 12);
 
-    const getEmail = await AccountModel.findOne({
-      email: email,
-      userType: "STUDENT",
-    });
+//     const getEmail = await AccountModel.findOne({
+//       email: email,
+//       userType: "STUDENT",
+//     });
 
-    if (!getEmail) {
-      return res.status(401).json({
-        body: "Something went wrong. Please contact your Administrator!",
-      });
-    }
+//     if (!getEmail) {
+//       return res.status(401).json({
+//         body: "Something went wrong. Please contact your Administrator!",
+//       });
+//     }
 
-    await getEmail.updateOne({
-      password: password,
-    });
+//     await getEmail.updateOne({
+//       password: password,
+//     });
 
-    return res
-      .status(200)
-      .json({ success: true, body: "Recovered Successfully" });
-  } catch (error) {
-    return res.status(404).json(error);
-  }
-};
+//     return res
+//       .status(200)
+//       .json({ success: true, body: "Recovered Successfully" });
+//   } catch (error) {
+//     return res.status(404).json(error);
+//   }
+// };
 
 const GetAllAccountUser = async (req, res) => {
   try {
@@ -219,8 +219,8 @@ const AccountLoginHistory = async (req, res) => { };
 
 module.exports = {
   AccountSignup,
-  ForgotPasswordVerifyEmail,
-  ForgotPasswordUpdatePassword,
+  // ForgotPasswordVerifyEmail,
+  // ForgotPasswordUpdatePassword,
   AccountLogin,
   AccountValidate,
   AccountLogout,

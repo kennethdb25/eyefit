@@ -2,8 +2,8 @@ const express = require("express");
 const AccountRouter = new express.Router();
 const {
   AccountSignup,
-  ForgotPasswordVerifyEmail,
-  ForgotPasswordUpdatePassword,
+  // ForgotPasswordVerifyEmail,
+  // ForgotPasswordUpdatePassword,
   AccountLogin,
   AccountValidate,
   AccountLogout,
@@ -26,14 +26,14 @@ AccountRouter.post("/api/user/registration", AccountSignup);
 // --------------- **** -------------- //
 
 // FORGOT PASSWORD //
-AccountRouter.get(
-  "/api/user/forgot-password/:email",
-  ForgotPasswordVerifyEmail
-);
-AccountRouter.patch(
-  "/api/user/forgot-password/:email",
-  ForgotPasswordUpdatePassword
-);
+// AccountRouter.get(
+//   "/api/user/forgot-password/:email",
+//   ForgotPasswordVerifyEmail
+// );
+// AccountRouter.patch(
+//   "/api/user/forgot-password/:email",
+//   ForgotPasswordUpdatePassword
+// );
 // --------------- **** -------------- //
 
 AccountRouter.get("/api/user/accounts", GetAllAccountUser);
