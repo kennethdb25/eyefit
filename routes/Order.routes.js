@@ -12,7 +12,7 @@ OrderRouter.post("/api/orders", AddOrder);
 
 OrderRouter.get("/api/orders", GetAllOrderPerCompany);
 
-OrderRouter.put("/api/orders/:id/status", UpdateOrderStatus);
+OrderRouter.put("/api/orders/status/:id", UpdateOrderStatus);
 
 // USER API
 OrderRouter.post("/api/user/checkout", AddCheckOut);

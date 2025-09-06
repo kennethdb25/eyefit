@@ -64,7 +64,7 @@ const Orders = () => {
     }
 
     try {
-      const response = await fetch(`/api/orders/${id}/status`, {
+      const response = await fetch(`/api/orders/status/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
