@@ -37,8 +37,8 @@ app.use(NotificationRouter);
 console.log('Loading InventoryRouter');
 app.use(InventoryRouter);
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+// app.use(express.static(path.join(__dirname, 'public')));
+// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 
 if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname, "client/build")));
