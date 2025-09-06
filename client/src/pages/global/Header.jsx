@@ -67,7 +67,7 @@ function Header({ OpenSidebar, setData }) {
 
   const markAsRead = async (id) => {
     try {
-      const res = await fetch(`/api/notification?notificationId=${id}`, {
+      const res = await fetch(`/api/notification/unread?notificationId=${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
