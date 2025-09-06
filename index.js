@@ -1,5 +1,6 @@
 const express = require("express");
 const favicon = require('serve-favicon');
+const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
 require("./config/database/db.conf");
@@ -19,22 +20,22 @@ const DeliveryRouter = require("./routes/Delivery.routes");
 const NotificationRouter = require("./routes/Notification.routes");
 const InventoryRouter = require("./routes/Inventory.routes");
 
-app.use(AccountRouter);
 console.log('Loading AccountRouter');
-app.use(ProductRouter);
+app.use(AccountRouter);
 console.log('Loading ProductRouter');
-app.use(AppointmentRouter);
+app.use(ProductRouter);
 console.log('Loading AppointmentRouter');
-app.use(UserRouter);
+app.use(AppointmentRouter);
 console.log('Loading UserRouter');
-app.use(OrderRouter);
+app.use(UserRouter);
 console.log('Loading OrderRouter');
-app.use(DeliveryRouter);
+app.use(OrderRouter);
 console.log('Loading DeliveryRouter');
-app.use(NotificationRouter);
+app.use(DeliveryRouter);
 console.log('Loading NotificationRouter');
-app.use(InventoryRouter);
+app.use(NotificationRouter);
 console.log('Loading InventoryRouter');
+app.use(InventoryRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
