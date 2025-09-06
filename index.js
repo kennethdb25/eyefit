@@ -20,21 +20,13 @@ const DeliveryRouter = require("./routes/Delivery.routes");
 const NotificationRouter = require("./routes/Notification.routes");
 const InventoryRouter = require("./routes/Inventory.routes");
 
-console.log('Loading AccountRouter');
 app.use(AccountRouter);
-console.log('Loading ProductRouter');
 app.use(ProductRouter);
-console.log('Loading AppointmentRouter');
 app.use(AppointmentRouter);
-console.log('Loading UserRouter');
 app.use(UserRouter);
-console.log('Loading OrderRouter');
 app.use(OrderRouter);
-console.log('Loading DeliveryRouter');
 app.use(DeliveryRouter);
-console.log('Loading NotificationRouter');
 app.use(NotificationRouter);
-console.log('Loading InventoryRouter');
 app.use(InventoryRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
