@@ -27,9 +27,6 @@ app.use(DeliveryRouter);
 app.use(NotificationRouter);
 app.use(InventoryRouter);
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-
 // module.exports = app;
 // end
 
@@ -40,3 +37,6 @@ if (process.env.NODE_ENV === "production") {
     res.sendFile(path.join(__dirname, "client/build", "index.html"));
   });
 }
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

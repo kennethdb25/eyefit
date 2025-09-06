@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 const UserModel = require("../models/UserModel");
 const ProductModel = require("../models/ProductModel");
 const OrderModel = require("../models/OrderModel");
@@ -266,11 +267,10 @@ const GetAllCheckoutPerUser = async (req, res) => {
   try {
     const userId = req.query.userId || "";
 
-    if (!userId) {
-      return res
-        .status(404)
-        .json({ message: `User ${userId} not found` });
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: "Invalid or missing userId" });
     }
+
 
     const allCheckout = await CheckOutModel.find({ user: userId })
       .populate("user") // optional: if you also want full user data
