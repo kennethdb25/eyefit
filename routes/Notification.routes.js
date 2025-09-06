@@ -10,6 +10,6 @@ NotificationRouter.get("/api/notification", GetNotificationPerCompany);
 
 NotificationRouter.put("/api/notification/mark-as-read", MarkAllNotificationsAsReadPerCompany);
 
-NotificationRouter.put("/api/notification/", MarkAsReadNotification);
+NotificationRouter.put("/api/notification", MarkAsReadNotification);
 
 module.exports = NotificationRouter;
