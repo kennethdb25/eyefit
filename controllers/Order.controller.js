@@ -23,7 +23,7 @@ const AddOrder = async (req, res) => {
     const validatedProducts = [];
 
     for (const item of products) {
-      const { productId, quantity } = item;
+      const { productId, quantity, color } = item;
 
       const product = await ProductModel.findById(productId);
       if (!product) {
@@ -57,11 +57,12 @@ const AddOrder = async (req, res) => {
       totalAmount += product.price * quantity;
 
       // Store for later use
-      validatedProducts.push({ product, quantity });
+      validatedProducts.push({ product, quantity, color });
     }
 
     // All validation passed — now deduct stocks and save
-    for (const { product, quantity } of validatedProducts) {
+    for (const { product, quantity, color } of validatedProducts) {
+      product.color = color;
       product.stocks -= quantity;
       productUpdates.push(product.save());
     }
@@ -74,6 +75,7 @@ const AddOrder = async (req, res) => {
       products: products.map((p) => ({
         product: p.productId,
         quantity: p.quantity,
+        color: p.color,
       })),
       paymentMethod: paymentMethod === 'otc' ? 'Over the counter' : 'Cash on Delivery',
       company: inventoryProduct[0].company || inventoryProduct.company,
@@ -108,7 +110,7 @@ const AddOrder = async (req, res) => {
     }
 
     res.status(201).json({
-      message: "Order placed successfully",
+      success: true,
       order: savedOrder,
     });
   } catch (error) {
@@ -183,7 +185,7 @@ const UpdateOrderStatus = async (req, res) => {
       await NotificationModel.create({
         type: "Shipped Order",
         orderId: _id,
-        userId: updateOrder?.userId,
+        userId: updateOrder?.user,
         path: "order",
         company: company,
         message: `Order #${updateOrder._id} ship by ${company || "shop"}`
@@ -207,7 +209,7 @@ const UpdateOrderStatus = async (req, res) => {
         await NotificationModel.create({
           type: "Completed Order",
           orderId: _id,
-          userId: updateOrder?.userId,
+          userId: updateOrder?.user,
           path: "order",
           company: company,
           message: `Order #${updateOrder._id} delivered successfully`
@@ -230,7 +232,7 @@ const UpdateOrderStatus = async (req, res) => {
 // USER API
 
 const AddCheckOut = async (req, res) => {
-  const { userId, productId } = req.body;
+  const { userId, productId, color } = req.body;
   try {
     // check if user id and product are valid
     const validateUser = await UserModel.findById(userId);
@@ -252,6 +254,7 @@ const AddCheckOut = async (req, res) => {
     const finalCheckout = await new CheckOutModel({
       user: userId,
       product: productId,
+      color
     });
 
     const storeRecord = await finalCheckout.save();
@@ -318,4 +321,20 @@ const RemoveAllCheckoutPerUser = async (req, res) => {
   }
 }
 
-module.exports = { AddOrder, GetAllOrderPerCompany, UpdateOrderStatus, AddCheckOut, GetAllCheckoutPerUser, RemoveCheckout, RemoveAllCheckoutPerUser };
+
+const GetAllOrderPerUser = async (req, res) => {
+  try {
+    const id = req.query.userId || "";
+
+    const allOrder = await OrderModel.find({ user: id })
+      .populate("user") // optional: if you also want full user data
+      .populate("products.product"); // <-- this populates product details
+
+    return res.status(200).json({ success: true, body: allOrder });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+};
+
+module.exports = { AddOrder, GetAllOrderPerCompany, UpdateOrderStatus, AddCheckOut, GetAllCheckoutPerUser, RemoveCheckout, RemoveAllCheckoutPerUser, GetAllOrderPerUser };

@@ -149,9 +149,6 @@ const ViewOrderModal = (props) => {
                 <Col span={12}>
                   <Text strong>Email: </Text> {selectedOrder.user.email}
                 </Col>
-                <Col span={24}>
-                  <Text strong>Address: </Text> {selectedOrder.user.address}
-                </Col>
                 <Col span={12}>
                   <Text strong>Status: </Text>
                   <>
@@ -180,6 +177,13 @@ const ViewOrderModal = (props) => {
                   </>
                 </Col>
                 <Col span={12}>
+                  <Text strong>Payment Method: </Text>
+                  {selectedOrder.paymentMethod || "Over the counter"}
+                </Col>
+                <Col span={24}>
+                  <Text strong>Address: </Text> {selectedOrder.user.address}
+                </Col>
+                <Col span={24}>
                   <Text strong>Total: </Text> ₱{selectedOrder.total}
                 </Col>
               </Row>
@@ -224,6 +228,10 @@ const ViewOrderModal = (props) => {
                         </div>
                         <div>
                           <Text strong>Quantity: </Text> {item.quantity}
+                        </div>
+                        <div>
+                          <Text strong>Color: </Text>
+                          {item.color ? item.color.toUpperCase() : "TBA"}
                         </div>
                         <div>
                           <Text strong>Status: </Text>

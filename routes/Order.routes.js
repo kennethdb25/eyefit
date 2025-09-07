@@ -5,7 +5,10 @@ const {
   GetAllOrderPerCompany,
   UpdateOrderStatus,
   AddCheckOut,
-  GetAllCheckoutPerUser, RemoveCheckout, RemoveAllCheckoutPerUser
+  GetAllCheckoutPerUser,
+  RemoveCheckout,
+  RemoveAllCheckoutPerUser,
+  GetAllOrderPerUser
 } = require("../controllers/Order.controller");
 
 OrderRouter.post("/api/orders", AddOrder);
@@ -22,5 +25,7 @@ OrderRouter.get("/api/user/get-checkout", GetAllCheckoutPerUser);
 OrderRouter.delete("/api/user/remove/checkout", RemoveCheckout)
 
 OrderRouter.delete("/api/user/remove/all/checkout", RemoveAllCheckoutPerUser)
+
+OrderRouter.get("/api/users/orders", GetAllOrderPerUser);
 
 module.exports = OrderRouter;

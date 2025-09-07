@@ -64,10 +64,6 @@ const ViewDeliveryModal = (props) => {
                 <Col span={12}>
                   <Text strong>Email: </Text> {selectedOrder.order.user.email}
                 </Col>
-                <Col span={24}>
-                  <Text strong>Address: </Text>{" "}
-                  {selectedOrder.order.user.address}
-                </Col>
                 <Col span={12}>
                   <Text strong>Status: </Text>
                   <>
@@ -82,7 +78,19 @@ const ViewDeliveryModal = (props) => {
                     )}
                   </>
                 </Col>
+                {/* <Col span={12}>
+                  <Text strong>Total: </Text> ₱{selectedOrder.order.total}
+                </Col> */}
+
                 <Col span={12}>
+                  <Text strong>Payment Method: </Text>
+                  {selectedOrder.order.paymentMethod || "Over the counter"}
+                </Col>
+                <Col span={24}>
+                  <Text strong>Address: </Text>{" "}
+                  {selectedOrder.order.user.address}
+                </Col>
+                <Col span={24}>
                   <Text strong>Total: </Text> ₱{selectedOrder.order.total}
                 </Col>
               </Row>
@@ -127,6 +135,10 @@ const ViewDeliveryModal = (props) => {
                         </div>
                         <div>
                           <Text strong>Quantity: </Text> {item.quantity}
+                        </div>
+                        <div>
+                          <Text strong>Color: </Text>{" "}
+                          {item.color ? item.color.toUpperCase() : "TBA"}
                         </div>
                         <div>
                           <Text strong>Status: </Text>

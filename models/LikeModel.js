@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const CheckOutSchema = new mongoose.Schema({
+const LikeSchema = new mongoose.Schema({
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -11,16 +11,12 @@ const CheckOutSchema = new mongoose.Schema({
         ref: "ProductInfo",
         required: true,
     },
-    color: {
-        type: String,
-        required: true
-    },
     createdAt: {
         type: Date,
         default: Date.now,
     },
 });
 
-const CheckOutModel = new mongoose.model("CheckOutInfo", CheckOutSchema);
+const LikeModel = new mongoose.model("LikeInfo", LikeSchema);
 
-module.exports = CheckOutModel;
+module.exports = LikeModel;

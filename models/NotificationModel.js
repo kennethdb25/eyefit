@@ -13,7 +13,8 @@ const NotificationSchema = new mongoose.Schema(
         company: { type: String },
         status: { type: String },
         message: { type: String, required: true },
-        read: { type: Boolean, default: false },
+        companyRead: { type: Boolean, default: false },
+        userRead: { type: Boolean, default: false },
     },
     { timestamps: true }
 );

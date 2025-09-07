@@ -40,7 +40,7 @@ function Header({ OpenSidebar, setData }) {
       const json = await res.json();
       const newList = json.body;
       const unreadMessage = newList.filter(
-        (item) => item.read === false
+        (item) => item.companyRead === false
       ).length;
       if (unreadMessage.length > 0) {
         const latest = unreadMessage[0];
@@ -193,7 +193,9 @@ function Header({ OpenSidebar, setData }) {
           renderItem={(item) => (
             <List.Item
               style={{ alignItems: "start", cursor: "pointer" }}
-              onClick={() => onNavigate(`/${item.path}`, item._id, item.read)}
+              onClick={() =>
+                onNavigate(`/${item.path}`, item._id, item.companyRead)
+              }
             >
               <div style={{ width: "100%" }}>
                 <Space
@@ -211,7 +213,7 @@ function Header({ OpenSidebar, setData }) {
                       : new Date().toLocaleString()}
                   </Text>
                   <div style={{ color: "red" }}>
-                    {item.read ? "" : "Unread"}
+                    {item.companyRead ? "" : "Unread"}
                   </div>
                 </Space>
 

@@ -10,7 +10,7 @@ export const Pagination = ({ data }) => {
     }
     const [paginationCount, setPaginationCount] = useState({
         defaultCurrent: 1,
-        pageSize: 10,
+        pageSize: 8,
         total: count,
     });
 
