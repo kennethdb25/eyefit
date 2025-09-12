@@ -97,7 +97,7 @@ const AddProductModal = ({
       newData.append("model", values.model);
       newData.append("price", values.price);
       newData.append("stocks", values.stocks);
-      newData.append("featured", values.featured);
+      newData.append("featured", values?.featured ? values?.featured : true);
       newData.append("rating", values.rating);
       newData.append("status", values.status);
       newData.append("company", loginData.body.company);
