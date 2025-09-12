@@ -11,6 +11,7 @@ const CheckOutSchema = new mongoose.Schema({
         ref: "ProductInfo",
         required: true,
     },
+    // add qty to model
     color: {
         type: String,
         required: true

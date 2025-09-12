@@ -62,7 +62,7 @@ const Appointments = () => {
       setIsModalVisible(false);
       messageApi.success(`Appointment ${status} successfully`);
     } catch (error) {
-      message.error(error.message);
+      messageApi.error(error.message);
     } finally {
       setLoading(false);
     }

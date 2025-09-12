@@ -102,6 +102,7 @@ const AddOrder = async (req, res) => {
         orderId: savedOrder._id,   // ✅ use the saved order’s id
         company: savedOrder.company,
         products: savedOrder.products,
+        // color: savedOrder?.products?.color,
         total: savedOrder.total,
       });
 
@@ -253,6 +254,7 @@ const AddCheckOut = async (req, res) => {
 
     const finalCheckout = await new CheckOutModel({
       user: userId,
+      // add qty to payload
       product: productId,
       color
     });

@@ -12,7 +12,6 @@ const AddProduct = async (req, res) => {
     price,
     stocks,
     featured,
-    rating,
     status,
     colors,
   } = req.body;
@@ -48,9 +47,10 @@ const AddProduct = async (req, res) => {
       price: price,
       stocks: stocks,
       featured: featured,
-      rating: rating,
+      rating: 0,
       status: status,
       colors: parsedColors, // ✅ save as array
+      // change product imageURL and publicId to array of Object that will accept multiple object details for images
       productImgURL: uploadedImages[0]?.url,
       productPublicId: uploadedImages[0]?.public_id,
     });
@@ -173,4 +173,22 @@ const GetAvailableProduct = async (req, res) => {
   }
 }
 
-module.exports = { AddProduct, EditProduct, GetAllProductByCompany, GetAvailableProduct };
+const SearchAvailableProduct = async (req, res) => {
+  try {
+    const query = req.query.q || ""; // Get search term
+    const products = await ProductModel.find({
+      $or: [
+        { productName: { $regex: query, $options: "i" } },
+        { brand: { $regex: query, $options: "i" } },
+        { model: { $regex: query, $options: "i" } },
+        { company: { $regex: query, $options: "i" } },
+      ], status: { $nin: ['Discontinued'] }
+    });
+    res.status(200).json({ success: true, body: products });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+}
+
+module.exports = { AddProduct, EditProduct, GetAllProductByCompany, GetAvailableProduct, SearchAvailableProduct };

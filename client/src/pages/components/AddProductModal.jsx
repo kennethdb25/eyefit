@@ -59,8 +59,7 @@ const AddProductModal = ({
       newData.append("model", values.model);
       newData.append("price", values.price);
       newData.append("stocks", values.stocks);
-      newData.append("featured", values.featured);
-      newData.append("rating", values.rating);
+      newData.append("featured", values?.featured ? values?.featured : true);
       newData.append("status", values.status);
       newData.append("company", loginData.body.company);
       newData.append("colors", JSON.stringify(values.colors || []));
@@ -267,8 +266,8 @@ const AddProductModal = ({
             <Row gutter={12}>
               <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
                 <Form.Item
-                  name="colors"
-                  label="Colors"
+                  name="color"
+                  label="Color Variant"
                   rules={[
                     {
                       required: true,
@@ -277,28 +276,6 @@ const AddProductModal = ({
                   ]}
                 >
                   <ColorInput />
-                </Form.Item>
-              </Col>
-              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
-                <Form.Item
-                  name="rating"
-                  label="Rating"
-                  initialValue={5}
-                  rules={[
-                    {
-                      type: "number",
-                      min: 0,
-                      max: 5,
-                      message: "Rating must be 0–5",
-                    },
-                  ]}
-                >
-                  <InputNumber
-                    step={0.1}
-                    min={0}
-                    max={5}
-                    style={{ width: "100%" }}
-                  />
                 </Form.Item>
               </Col>
               <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">

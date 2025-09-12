@@ -22,7 +22,7 @@ const AccountLogin = async (req, res) => {
       } else {
         const token = await userEmail.generateAuthToken();
 
-        res.cookie("UserCookie", token, {
+        res.cookie("UsersCookie", token, {
           expire: new Date(Date.now + 604800000),
           httpOnly: true,
         });
@@ -47,6 +47,22 @@ const AccountUserValidate = async (req, res) => {
     return res.status(201).json({ body: validAccount });
   } catch (error) {
     return res.status(401).json({ body: "Unauthorized Access", status: 401 });
+  }
+};
+
+
+const AccountUserLogout = async (req, res) => {
+  try {
+    req.rootUser.tokens = req.rootUser.tokens.filter((currElem) => {
+      return currElem != req.token;
+    });
+    res.clearCookie("UsersCookie", { path: "/" });
+
+    req.rootUser.save();
+
+    return res.status(201).json({ success: true });
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -86,6 +102,31 @@ const AddUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const UpdateUserAddress = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { address } = req.body;
+
+    const user = await UserModel.findByIdAndUpdate(
+      id,
+      { address },
+      { new: true }
+    )
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    res.status(201).json({
+      success: true,
+      body: user,
+    });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+}
 
 const LikeProduct = async (req, res) => {
   const { userId, productId } = req.body;
@@ -141,8 +182,6 @@ const GetAllLikeProductPerUser = async (req, res) => {
     return res.status(404).json(error);
   }
 }
-
-
 
 const RecentlyViewProduct = async (req, res) => {
   const { userId, productId } = req.body;
@@ -204,8 +243,10 @@ module.exports = {
   AccountLogin,
   AccountUserValidate,
   AddUser,
+  UpdateUserAddress,
   LikeProduct,
   GetAllLikeProductPerUser,
   RecentlyViewProduct,
-  GetAllRecentlyViewProductPerUser
+  GetAllRecentlyViewProductPerUser,
+  AccountUserLogout
 };

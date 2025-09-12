@@ -230,7 +230,7 @@ const ViewOrderModal = (props) => {
                           <Text strong>Quantity: </Text> {item.quantity}
                         </div>
                         <div>
-                          <Text strong>Color: </Text>
+                          <Text strong>Color Variant: </Text>
                           {item.color ? item.color.toUpperCase() : "TBA"}
                         </div>
                         <div>

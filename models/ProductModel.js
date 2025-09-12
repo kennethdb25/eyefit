@@ -6,6 +6,7 @@ const ProductSchema = new mongoose.Schema({
     required: [true, "Please provide a name for the product"],
     maxlength: [40, "Name can not be more than 40 characters"],
   },
+  // change product imageURL and publicId to array of Object that will accept multiple object details for images
   productImgURL: {
     type: String,
     required: true,

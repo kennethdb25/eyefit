@@ -1,19 +1,47 @@
+const AccountModel = require("../models/AccountModel");
 const AppointmentModel = require("../models/AppointmentModel");
+
+const GetAvailableBusinessForAppointment = async (req, res) => {
+  try {
+    const AvailableBusiness = await AccountModel.aggregate([
+      {
+        '$match': {
+          'userType': 'BUSINESS USER'
+        }
+      }, {
+        '$group': {
+          '_id': '$company'
+        }
+      }, {
+        '$project': {
+          '_id': 0,
+          'company': '$_id'
+        }
+      }
+    ]);
+
+    return res.status(200).json({ success: true, body: AvailableBusiness });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: error.message });
+  }
+}
 
 const AddAnAppointment = async (req, res) => {
   try {
-    const { customerName, address, gender, age, order, date, time, company } =
+    const { name, address, gender, description, email, phone, date, time, store } =
       req.body;
 
     const appointment = new AppointmentModel({
-      customerName,
+      customerName: name,
       address,
+      contact: phone,
+      email,
       gender,
-      age,
-      order,
+      order: description ? description.toUpperCase() : "N.A",
       date,
       time,
-      company,
+      company: store,
     });
 
     const savedAppointment = await appointment.save();
@@ -81,8 +109,24 @@ const UpdateAppointmentStatus = async (req, res) => {
   }
 };
 
+
+const GetAllAppointmentPerUser = async (req, res) => {
+  try {
+    const email = req.query.email || "";
+
+    const allAppointments = await AppointmentModel.find({ email });
+
+    return res.status(200).json({ success: true, body: allAppointments });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+};
+
 module.exports = {
+  GetAvailableBusinessForAppointment,
   AddAnAppointment,
   GetAllAppointmentPerCompany,
   UpdateAppointmentStatus,
+  GetAllAppointmentPerUser
 };

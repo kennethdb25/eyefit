@@ -61,13 +61,10 @@ const ViewInventoryModal = (props) => {
                   <Text strong>Contact: </Text> {selectedOrder.user.contact}
                 </Col>
                 <Col span={12}>
-                  <Text strong>Order Id: </Text> {selectedOrder.orderId}
-                </Col>
-                <Col span={24}>
                   <Text strong>Email: </Text> {selectedOrder.user.email}
                 </Col>
                 <Col span={24}>
-                  <Text strong>Address: </Text> {selectedOrder.user.address}
+                  <Text strong>Order Id: </Text> {selectedOrder.orderId}
                 </Col>
                 <Col span={12}>
                   <Text strong>Status: </Text>
@@ -95,6 +92,13 @@ const ViewInventoryModal = (props) => {
                       </Tag>
                     )}
                   </>
+                </Col>
+                <Col span={12}>
+                  <Text strong>Payment Method: </Text>
+                  {selectedOrder.paymentMethod || "Over the counter"}
+                </Col>
+                <Col span={24}>
+                  <Text strong>Address: </Text> {selectedOrder.user.address}
                 </Col>
                 <Col span={12}>
                   <Text strong>Total: </Text> ₱{selectedOrder.total}
@@ -141,6 +145,10 @@ const ViewInventoryModal = (props) => {
                         </div>
                         <div>
                           <Text strong>Quantity: </Text> {item.quantity}
+                        </div>
+                        <div>
+                          <Text strong>Color: </Text>
+                          {item.color ? item.color.toUpperCase() : "TBA"}
                         </div>
                         <div>
                           <Text strong>Status: </Text>

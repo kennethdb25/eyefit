@@ -4,19 +4,25 @@ const {
     AccountLogin,
     AccountUserValidate,
     AddUser,
+    UpdateUserAddress,
     LikeProduct,
     GetAllLikeProductPerUser,
     RecentlyViewProduct,
-    GetAllRecentlyViewProductPerUser
+    GetAllRecentlyViewProductPerUser,
+    AccountUserLogout
 } = require("../controllers/User.controller");
 const { ValidateUserAccount } = require("../middlewares/Authenticate");
 
 UserRouter.post("/api/users", AddUser);
 
+UserRouter.put("/api/users/address/:id", UpdateUserAddress);
+
 // LOGIN AND VALIDATE //
 UserRouter.post("/api/users/login", AccountLogin);
 UserRouter.get("/api/users/validate", ValidateUserAccount, AccountUserValidate);
 // --------------- **** -------------- //
+
+UserRouter.get("/api/users/logout", ValidateUserAccount, AccountUserLogout);
 
 UserRouter.post("/api/users/like", LikeProduct)
 

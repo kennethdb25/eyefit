@@ -13,9 +13,13 @@ const AppointmentSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide your gender"],
   },
-  age: {
-    type: Number,
-    required: [true, "Please provide your age for the appointment"],
+  contact: {
+    type: String,
+    required: [true, "Please provide your contact"],
+  },
+  email: {
+    type: String,
+    required: [true, "Please provide your email"],
   },
   order: {
     type: String,
