@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useContext } from "react";
 import {
   BsFillArchiveFill,
   BsFillGrid3X3GapFill,
@@ -5,153 +6,247 @@ import {
   BsFillBellFill,
 } from "react-icons/bs";
 import {
-  BarChart,
-  Bar,
+  LineChart,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   Legend,
   ResponsiveContainer,
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
 } from "recharts";
+import "./Dashboard.css";
+import { LoginContext } from "../../context/LoginContext";
 
-function Home() {
-  const data = [
-    {
-      name: "Page A",
-      uv: 4000,
-      pv: 2400,
-      amt: 2400,
-    },
-    {
-      name: "Page B",
-      uv: 3000,
-      pv: 1398,
-      amt: 2210,
-    },
-    {
-      name: "Page C",
-      uv: 2000,
-      pv: 9800,
-      amt: 2290,
-    },
-    {
-      name: "Page D",
-      uv: 2780,
-      pv: 3908,
-      amt: 2000,
-    },
-    {
-      name: "Page E",
-      uv: 1890,
-      pv: 4800,
-      amt: 2181,
-    },
-    {
-      name: "Page F",
-      uv: 2390,
-      pv: 3800,
-      amt: 2500,
-    },
-    {
-      name: "Page G",
-      uv: 3490,
-      pv: 4300,
-      amt: 2100,
-    },
-  ];
+export default function Dashboard() {
+  const [orders, setOrders] = useState([]);
+  const [topProducts, setTopProducts] = useState([]);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const { loginData } = useContext(LoginContext);
+  const [summary, setSummary] = useState({
+    totalProducts: 0,
+    totalOrders: 0,
+    totalCustomers: 0,
+    totalCancelled: 0,
+  });
+
+  useEffect(() => {
+    const fetchSummary = async () => {
+      try {
+        const res = await fetch(
+          `/api/analytics/summary?company=${loginData?.body?.company}`
+        );
+        const data = await res.json();
+        setSummary(data);
+      } catch (error) {
+        console.error("Error fetching summary:", error);
+      }
+    };
+
+    if (loginData?.body?.company) {
+      fetchSummary();
+    }
+  }, [loginData]);
+
+  // ✅ Set default start and end date on mount
+  useEffect(() => {
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+    // Format date in local time (YYYY-MM-DD)
+    const formatDate = (date) => {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    };
+
+    setStartDate(formatDate(firstDay));
+    setEndDate(formatDate(lastDay));
+  }, []);
+
+  useEffect(() => {
+    if (startDate && endDate) {
+      fetchOrders();
+      fetchTopProducts();
+    }
+  }, [startDate, endDate]);
+
+  const fetchOrders = async () => {
+    try {
+      let url = "/api/analytics/order?";
+      const params = [];
+
+      if (startDate && endDate) {
+        params.push(`startDate=${startDate}&endDate=${endDate}`);
+      }
+      if (loginData?.body?.company) {
+        params.push(`company=${loginData.body.company}`);
+      }
+
+      if (params.length > 0) {
+        url += params.join("&");
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+      setOrders(data);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    }
+  };
+
+  const fetchTopProducts = async () => {
+    try {
+      let url = "/api/analytics/top-products?";
+      const params = [];
+
+      if (startDate && endDate) {
+        params.push(`startDate=${startDate}&endDate=${endDate}`);
+      }
+
+      if (loginData?.body?.company) {
+        params.push(`company=${loginData.body.company}`);
+      }
+
+      if (params.length > 0) {
+        url += params.join("&");
+      }
+
+      const res = await fetch(url);
+      const data = await res.json();
+      setTopProducts(data);
+    } catch (error) {
+      console.error("Error fetching top products:", error);
+    }
+  };
+
+  const chartData = orders.map((order) => ({
+    date: order.date,
+    total: order.total,
+    items: order.items,
+  }));
 
   return (
     <main className="main-container">
       <div className="main-title">
         <h3>DASHBOARD</h3>
       </div>
-
       <div className="main-cards">
         <div className="card">
           <div className="card-inner">
             <h3>PRODUCTS</h3>
             <BsFillArchiveFill className="card_icon" />
           </div>
-          <h1>300</h1>
+          <h1>{summary.totalProducts}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
             <h3>ORDERS</h3>
             <BsFillGrid3X3GapFill className="card_icon" />
           </div>
-          <h1>12</h1>
+          <h1>{summary.totalOrders}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
             <h3>CUSTOMERS</h3>
             <BsPeopleFill className="card_icon" />
           </div>
-          <h1>33</h1>
+          <h1>{summary.totalCustomers}</h1>
         </div>
         <div className="card">
           <div className="card-inner">
-            <h3>RETURNS</h3>
+            <h3>CANCELLED</h3>
             <BsFillBellFill className="card_icon" />
           </div>
-          <h1>42</h1>
+          <h1>{summary.totalCancelled}</h1>
         </div>
       </div>
 
-      <div className="charts">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            width={500}
-            height={300}
-            data={data}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="pv" fill="#8884d8" />
-            <Bar dataKey="uv" fill="#82ca9d" />
-          </BarChart>
-        </ResponsiveContainer>
-
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            width={500}
-            height={300}
-            data={data}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line
-              type="monotone"
-              dataKey="pv"
-              stroke="#8884d8"
-              activeDot={{ r: 8 }}
-            />
-            <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-          </LineChart>
-        </ResponsiveContainer>
+      <div className="dashboard">
+        <h1>Order Analytics Dashboard</h1>
+        <div className="filters">
+          <input
+            type="date"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+          <input
+            type="date"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+        {/* Charts */}
+        <div className="charts">
+          <div className="chart">
+            <h2>Total Sales Over Time</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="total" stroke="#8884d8" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+          <div className="chart">
+            <h2>Items Sold Over Time</h2>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="items" fill="#82ca9d" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+        <div className="chart" style={{ marginBottom: "20px" }}>
+          <h2>TOP SELLING</h2>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={topProducts}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Bar dataKey="totalQuantity" fill="#ff8042" />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="table-container">
+          <div className="order-details">
+            <h2>ORDER DETAILS</h2>
+          </div>
+          <table className="dashboard-table">
+            <thead>
+              <tr>
+                <th className="table-head-dashboard">Date</th>
+                <th className="table-head-dashboard">Total</th>
+                <th className="table-head-dashboard">Items</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chartData.map((row, i) => (
+                <tr key={i}>
+                  <td className="table-data-dashboard">{row.date}</td>
+                  <td className="table-data-dashboard">{row.total}</td>
+                  <td className="table-data-dashboard">{row.items}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </main>
   );
 }
-
-export default Home;

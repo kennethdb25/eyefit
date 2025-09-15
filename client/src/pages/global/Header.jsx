@@ -146,9 +146,9 @@ function Header({ OpenSidebar, setData }) {
       </div>
       <div className="header-left">{/* <BsSearch className="icon" /> */}</div>
       <div className="header-right">
-        <Badge count={unread} size="small">
+        <Badge className="badge" count={unread} size="small">
           <BellOutlined
-            className="icon"
+            className="icons"
             onClick={() => setOpen(true)}
             style={{ fontSize: 20, cursor: "pointer", color: "black" }}
             aria-label="Open notifications"

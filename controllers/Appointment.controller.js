@@ -71,12 +71,26 @@ const GetAllAppointmentPerCompany = async (req, res) => {
   }
 };
 
+
+const GetAllValidAppointmentPerCompany = async (req, res) => {
+  try {
+    const company = req.query.company || "";
+
+    const allValidAppointments = await AppointmentModel.find({ company, status: { $nin: ['Cancelled', 'Rejected'] } });
+
+    return res.status(200).json({ success: true, body: allValidAppointments });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json(error);
+  }
+};
+
 const UpdateAppointmentStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
   // Only allow "Accepted" or "Rejected"
-  if (!["Accepted", "Rejected"].includes(status)) {
+  if (!["Accepted", "Rejected", "Cancelled"].includes(status)) {
     return res.status(400).json({
       success: false,
       message: "Invalid status. Must be 'Accepted' or 'Rejected'.",
@@ -114,7 +128,7 @@ const GetAllAppointmentPerUser = async (req, res) => {
   try {
     const email = req.query.email || "";
 
-    const allAppointments = await AppointmentModel.find({ email });
+    const allAppointments = await AppointmentModel.find({ email }).sort({ createdAt: -1 });
 
     return res.status(200).json({ success: true, body: allAppointments });
   } catch (error) {
@@ -127,6 +141,7 @@ module.exports = {
   GetAvailableBusinessForAppointment,
   AddAnAppointment,
   GetAllAppointmentPerCompany,
+  GetAllValidAppointmentPerCompany,
   UpdateAppointmentStatus,
   GetAllAppointmentPerUser
 };

@@ -12,6 +12,9 @@ const CheckOutSchema = new mongoose.Schema({
         required: true,
     },
     // add qty to model
+    quantity: {
+        type: Number
+    },
     color: {
         type: String,
         required: true

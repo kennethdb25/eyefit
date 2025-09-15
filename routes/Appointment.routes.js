@@ -4,6 +4,7 @@ const {
   GetAvailableBusinessForAppointment,
   AddAnAppointment,
   GetAllAppointmentPerCompany,
+  GetAllValidAppointmentPerCompany,
   UpdateAppointmentStatus,
   GetAllAppointmentPerUser
 } = require("../controllers/Appointment.controller");
@@ -17,5 +18,7 @@ AppointmentRouter.get("/api/appointments", GetAllAppointmentPerCompany);
 AppointmentRouter.put("/api/appointments/status/:id", UpdateAppointmentStatus);
 
 AppointmentRouter.get("/api/users/appointments", GetAllAppointmentPerUser);
+
+AppointmentRouter.get("/api/validate/appointment", GetAllValidAppointmentPerCompany);
 
 module.exports = AppointmentRouter;

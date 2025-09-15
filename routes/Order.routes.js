@@ -8,6 +8,7 @@ const {
   GetAllCheckoutPerUser,
   RemoveCheckout,
   RemoveAllCheckoutPerUser,
+  AddOrSubCheckoutQty,
   GetAllOrderPerUser
 } = require("../controllers/Order.controller");
 
@@ -25,6 +26,8 @@ OrderRouter.get("/api/user/get-checkout", GetAllCheckoutPerUser);
 OrderRouter.delete("/api/user/remove/checkout", RemoveCheckout)
 
 OrderRouter.delete("/api/user/remove/all/checkout", RemoveAllCheckoutPerUser)
+
+OrderRouter.put("/api/user/checkout/:id/quantity", AddOrSubCheckoutQty);
 
 OrderRouter.get("/api/users/orders", GetAllOrderPerUser);
 

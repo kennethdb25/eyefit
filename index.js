@@ -19,6 +19,7 @@ const OrderRouter = require("./routes/Order.routes");
 const DeliveryRouter = require("./routes/Delivery.routes");
 const NotificationRouter = require("./routes/Notification.routes");
 const InventoryRouter = require("./routes/Inventory.routes");
+const AnalyticsRouter = require("./routes/Analytics.routes");
 
 app.use(AccountRouter);
 app.use(ProductRouter);
@@ -28,6 +29,7 @@ app.use(OrderRouter);
 app.use(DeliveryRouter);
 app.use(NotificationRouter);
 app.use(InventoryRouter);
+app.use(AnalyticsRouter);
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));

@@ -13,6 +13,11 @@ code {
   font-family: "source-code-pro, Menlo, Monaco, Consolas, Courier New, monospace";
 }
 
+.badge {
+  padding: 0;
+  margin: 0;
+}
+
 .icon {
   vertical-align: middle;
   line-height: 1px;
@@ -38,7 +43,7 @@ code {
 
 .grid-container {
   display: grid;
-  grid-template-columns: 260px 1fr 1fr 1fr;
+  grid-template-columns: 260px 1fr;
   grid-template-rows: 0.2fr 3fr;
   grid-template-areas:
     "sidebar header header header"
