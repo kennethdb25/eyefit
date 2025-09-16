@@ -9,7 +9,6 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    padding: "20px",
   },
   loginCard: {
     display: "flex",
