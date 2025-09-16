@@ -4,77 +4,72 @@ import { createTheme } from "@mui/material/styles";
 const theme = createTheme();
 const useStyles = makeStyles(() => ({
   loginContainer: {
-    backgroundImage: "url(/bg.png)",
-    backgroundPosition: "center",
-    backgroundSize: "100% 100%",
+    background: "linear-gradient(135deg, #b8d8c1, #d9f0e6)", // Soft green gradient
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
-
-    [theme.breakpoints.up("md")]: {
-      paddingLeft: "100px",
-      justifyContent: "start",
-    },
-    [theme.breakpoints.down("md")]: {
-      backgroundImage: "url(/cp-login.png)",
-      paddingLeft: "0px",
-      justifyContent: "center",
-    },
+    justifyContent: "center",
+    padding: "20px",
   },
   loginCard: {
     display: "flex",
-    alignContent: "center",
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     flexDirection: "column",
-    padding: "20px",
-    background: "white",
-    border: "1px lightgray solid",
-    boxShadow: "rgb(109, 107, 107) 0px 20px 30px -10px",
-    borderRadius: "10px",
-
+    padding: "40px 30px",
+    background: "rgba(255, 255, 255, 0.9)",
+    borderRadius: "20px",
+    backdropFilter: "blur(12px)",
+    boxShadow: "0 8px 25px rgba(0, 0, 0, 0.15)",
     [theme.breakpoints.up("md")]: {
       width: "400px",
     },
     [theme.breakpoints.down("md")]: {
-      width: "80%",
+      width: "90%",
     },
+  },
+  title: {
+    fontWeight: "bold",
+    color: "#4b5d50", // Muted deep green-gray for contrast
+    marginBottom: "20px",
+    fontSize: "28px",
+    letterSpacing: "1px",
+  },
+  inputField: {
+    borderRadius: "50px !important",
+    padding: "10px",
+    fontSize: "16px",
+    border: "1px solid #b8d8c1",
+    "&:focus-within": {
+      borderColor: "#8fbf9f", // Slightly deeper green when focused
+      boxShadow: "0 0 5px rgba(184, 216, 193, 0.8)",
+    },
+  },
+  forgotWrapper: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginBottom: "15px",
   },
   loginDetails: {
     display: "flex",
-    alignContent: "center",
     justifyContent: "center",
     alignItems: "center",
-    flexDirection: "column",
-    padding: "10px",
-
-    [theme.breakpoints.up("md")]: {
-      width: "360px",
-    },
-    [theme.breakpoints.down("md")]: {
-      width: "100%",
-    },
   },
-  whoComplaint: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    flexDirection: "column",
-    padding: "20px",
-    background: "white",
-    border: "1px lightgray solid",
-    borderRadius: "10px",
-
-    [theme.breakpoints.up("md")]: {
-      width: "120%",
-    },
-    [theme.breakpoints.down("md")]: {
-      width: "100%",
+  loginButton: {
+    width: "100%",
+    borderRadius: "50px !important",
+    fontWeight: "bold",
+    letterSpacing: "1px",
+    background: "#b8d8c1",
+    border: "none",
+    color: "#2f3e34",
+    "&:hover": {
+      background: "#a6cdb1", // Slightly darker pastel green
     },
   },
   Form: {
     width: "100%",
-    paddingTop: "20px",
+    marginTop: "20px",
   },
 }));
 

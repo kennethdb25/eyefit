@@ -85,105 +85,83 @@ const LoginForm = (props) => {
   };
 
   return (
-    <Box className={classes.loginCard}>
+    <Box className={classes.loginContainer}>
       <ToastContainer />
-      <Box alignItems="center">
-        <Title level={2}>EYEFIT</Title>
-      </Box>
-      <Form
-        name="basic"
-        labelCol={{ span: 24 }}
-        wrapperCol={{ span: 24 }}
-        initialValues={{ remember: true }}
-        onFinish={onFinish}
-        onFinishFailed={onFinishFailed}
-        autoComplete="off"
-        className={classes.Form}
-      >
-        <Form.Item
-          name="email"
-          rules={[
-            {
-              message: "Email is required",
-              required: true,
-            },
-            { whitespace: true },
-            { type: "email", message: "Please enter a valid email" },
-          ]}
-          hasFeedback
+      <Box className={classes.loginCard}>
+        <Title level={2} className={classes.title}>
+          EYEFIT
+        </Title>
+        <Form
+          name="basic"
+          labelCol={{ span: 24 }}
+          wrapperCol={{ span: 24 }}
+          initialValues={{ remember: true }}
+          onFinish={onFinish}
+          onFinishFailed={onFinishFailed}
+          autoComplete="off"
+          className={classes.Form}
         >
-          <Input
-            prefix={<UserOutlined style={{ marginRight: "10px" }} />}
-            placeholder="Please enter your email address"
-            style={{ borderRadius: "10px" }}
-          />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          rules={[
-            {
-              required: true,
-              message: "Password is required!",
-            },
-          ]}
-        >
-          <Input.Password
-            prefix={<LockOutlined style={{ marginRight: "10px" }} />}
-            placeholder="Please enter your password"
-            style={{ borderRadius: "10px" }}
-          />
-        </Form.Item>
-        <Box>
-          <Row gutter={8}>
-            <Col xs={{ span: 24 }} md={{ span: 24 }}>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  justifyContent: "center",
-                }}
-              >
-                {/* <Form.Item>
-                  <Typography
-                    onClick={showSignUpForm}
-                    style={{ cursor: "pointer", color: "gray" }}
-                  >
-                    No Account? Register Here!
-                  </Typography>
-                </Form.Item> */}
-                <Form.Item>
-                  <Typography
-                    component={Link}
-                    style={{ textDecoration: "none", color: "gray" }}
-                    href="/forgot-password"
-                    sx={{ "&:hover": { cursor: "pointer" } }}
-                  >
-                    Forgot Password?
-                  </Typography>
-                </Form.Item>
-              </div>
-            </Col>
-          </Row>
+          {/* Email */}
+          <Form.Item
+            name="email"
+            rules={[
+              { message: "Email is required", required: true },
+              { whitespace: true },
+              { type: "email", message: "Please enter a valid email" },
+            ]}
+            hasFeedback
+          >
+            <Input
+              size="large"
+              prefix={<UserOutlined style={{ marginRight: "10px" }} />}
+              placeholder="Email address"
+              className={classes.inputField}
+            />
+          </Form.Item>
+
+          {/* Password */}
+          <Form.Item
+            name="password"
+            rules={[{ required: true, message: "Password is required!" }]}
+          >
+            <Input.Password
+              size="large"
+              prefix={<LockOutlined style={{ marginRight: "10px" }} />}
+              placeholder="Password"
+              className={classes.inputField}
+            />
+          </Form.Item>
+
+          {/* Forgot Password */}
+          <Box className={classes.forgotWrapper}>
+            <Typography
+              component={Link}
+              href="/forgot-password"
+              style={{ textDecoration: "none", color: "#1976d2" }}
+            >
+              Forgot Password?
+            </Typography>
+          </Box>
+
+          {/* Login Button */}
           <Form.Item>
             <div className={classes.loginDetails}>
               <Button
-                htmlType="submit"
-                // type="primary"
-                style={{ backgroundColor: "blue", color: "white" }}
+                type="primary"
+                size="large"
+                shape="round"
                 icon={<PoweroffOutlined />}
-                loading={
-                  loadings[5] && {
-                    icon: <SyncOutlined spin />,
-                  }
-                }
+                loading={loadings[5] && { icon: <SyncOutlined spin /> }}
                 onClick={() => enterLoading(5)}
+                className={classes.loginButton}
+                htmlType="submit"
               >
-                <span style={{ fontSize: "16px" }}>LOGIN</span>
+                LOGIN
               </Button>
             </div>
           </Form.Item>
-        </Box>
-      </Form>
+        </Form>
+      </Box>
     </Box>
   );
 };

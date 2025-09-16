@@ -136,117 +136,121 @@ export default function Dashboard() {
       <div className="main-title">
         <h3>DASHBOARD</h3>
       </div>
-      <div className="main-cards">
-        <div className="card">
-          <div className="card-inner">
-            <h3>PRODUCTS</h3>
-            <BsFillArchiveFill className="card_icon" />
+      {loginData?.body?.userType !== "ADMIN USER" ? (
+        <div className="main-cards">
+          <div className="card">
+            <div className="card-inner">
+              <h3>PRODUCTS</h3>
+              <BsFillArchiveFill className="card_icon" />
+            </div>
+            <h1>{summary.totalProducts}</h1>
           </div>
-          <h1>{summary.totalProducts}</h1>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <h3>ORDERS</h3>
-            <BsFillGrid3X3GapFill className="card_icon" />
+          <div className="card">
+            <div className="card-inner">
+              <h3>ORDERS</h3>
+              <BsFillGrid3X3GapFill className="card_icon" />
+            </div>
+            <h1>{summary.totalOrders}</h1>
           </div>
-          <h1>{summary.totalOrders}</h1>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <h3>CUSTOMERS</h3>
-            <BsPeopleFill className="card_icon" />
+          <div className="card">
+            <div className="card-inner">
+              <h3>CUSTOMERS</h3>
+              <BsPeopleFill className="card_icon" />
+            </div>
+            <h1>{summary.totalCustomers}</h1>
           </div>
-          <h1>{summary.totalCustomers}</h1>
-        </div>
-        <div className="card">
-          <div className="card-inner">
-            <h3>CANCELLED</h3>
-            <BsFillBellFill className="card_icon" />
+          <div className="card">
+            <div className="card-inner">
+              <h3>CANCELLED</h3>
+              <BsFillBellFill className="card_icon" />
+            </div>
+            <h1>{summary.totalCancelled}</h1>
           </div>
-          <h1>{summary.totalCancelled}</h1>
         </div>
-      </div>
+      ) : null}
 
-      <div className="dashboard">
-        <h1>Order Analytics Dashboard</h1>
-        <div className="filters">
-          <input
-            type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
-          />
-        </div>
-        {/* Charts */}
-        <div className="charts">
-          <div className="chart">
-            <h2>Total Sales Over Time</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="total" stroke="#8884d8" />
-              </LineChart>
-            </ResponsiveContainer>
+      {loginData?.body?.userType !== "ADMIN USER" ? (
+        <div className="dashboard">
+          <h1>Order Analytics Dashboard</h1>
+          <div className="filters">
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
           </div>
-          <div className="chart">
-            <h2>Items Sold Over Time</h2>
+          {/* Charts */}
+          <div className="charts">
+            <div className="chart">
+              <h2>Total Sales Over Time</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="total" stroke="#8884d8" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="chart">
+              <h2>Items Sold Over Time</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="items" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="chart" style={{ marginBottom: "20px" }}>
+            <h2>TOP SELLING</h2>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData}>
+              <BarChart data={topProducts}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
+                <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="items" fill="#82ca9d" />
+                <Bar dataKey="totalQuantity" fill="#ff8042" />
               </BarChart>
             </ResponsiveContainer>
           </div>
-        </div>
-        <div className="chart" style={{ marginBottom: "20px" }}>
-          <h2>TOP SELLING</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={topProducts}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="totalQuantity" fill="#ff8042" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        <div className="table-container">
-          <div className="order-details">
-            <h2>ORDER DETAILS</h2>
-          </div>
-          <table className="dashboard-table">
-            <thead>
-              <tr>
-                <th className="table-head-dashboard">Date</th>
-                <th className="table-head-dashboard">Total</th>
-                <th className="table-head-dashboard">Items</th>
-              </tr>
-            </thead>
-            <tbody>
-              {chartData.map((row, i) => (
-                <tr key={i}>
-                  <td className="table-data-dashboard">{row.date}</td>
-                  <td className="table-data-dashboard">{row.total}</td>
-                  <td className="table-data-dashboard">{row.items}</td>
+          <div className="table-container">
+            <div className="order-details">
+              <h2>ORDER DETAILS</h2>
+            </div>
+            <table className="dashboard-table">
+              <thead>
+                <tr>
+                  <th className="table-head-dashboard">Date</th>
+                  <th className="table-head-dashboard">Total</th>
+                  <th className="table-head-dashboard">Items</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {chartData.map((row, i) => (
+                  <tr key={i}>
+                    <td className="table-data-dashboard">{row.date}</td>
+                    <td className="table-data-dashboard">{row.total}</td>
+                    <td className="table-data-dashboard">{row.items}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
+      ) : null}
     </main>
   );
 }
