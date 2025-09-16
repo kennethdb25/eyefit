@@ -88,9 +88,13 @@ const LoginForm = (props) => {
     <Box className={classes.loginContainer}>
       <ToastContainer />
       <Box className={classes.loginCard}>
-        <Title level={2} className={classes.title}>
-          EYEFIT
-        </Title>
+        <div className="text-center mb-6">
+          <img
+            src="/icon.png"
+            alt="icon_sidebar"
+            style={{ width: "150px", height: "150px", margin: "0 auto" }}
+          />
+        </div>
         <Form
           name="basic"
           labelCol={{ span: 24 }}

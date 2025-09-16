@@ -16,7 +16,7 @@ const useStyles = makeStyles(() => ({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "column",
-    padding: "40px 30px",
+    padding: "0 20px 30px 30px",
     background: "rgba(255, 255, 255, 0.9)",
     borderRadius: "20px",
     backdropFilter: "blur(12px)",
