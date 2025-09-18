@@ -228,21 +228,21 @@ export default function Dashboard() {
           </div>
           <div className="table-container">
             <div className="order-details">
-              <h2>ORDER DETAILS</h2>
+              <h2>TOTAL SALES PER DAY</h2>
             </div>
             <table className="dashboard-table">
               <thead>
                 <tr>
                   <th className="table-head-dashboard">Date</th>
                   <th className="table-head-dashboard">Total</th>
-                  <th className="table-head-dashboard">Items</th>
+                  <th className="table-head-dashboard">Total Items Sold</th>
                 </tr>
               </thead>
               <tbody>
                 {chartData.map((row, i) => (
                   <tr key={i}>
                     <td className="table-data-dashboard">{row.date}</td>
-                    <td className="table-data-dashboard">{row.total}</td>
+                    <td className="table-data-dashboard">{`Php ${row.total}.00`}</td>
                     <td className="table-data-dashboard">{row.items}</td>
                   </tr>
                 ))}
