@@ -1,4 +1,4 @@
-const mongoose = require("mongoose")
+const mongoose = require("mongoose");
 const UserModel = require("../models/UserModel");
 const ProductModel = require("../models/ProductModel");
 const OrderModel = require("../models/OrderModel");
@@ -7,69 +7,77 @@ const DeliveryModel = require("../models/DeliverModel");
 const NotificationModel = require("../models/NotificationModel");
 const CheckOutModel = require("../models/CheckoutModel");
 
-// const { BadRequest } = require("../utils/httpError");
-
+// ---------------------------
+// ADD ORDER
+// ---------------------------
 const AddOrder = async (req, res) => {
   const { userId, products, paymentMethod } = req.body;
-  let previousCompany = null;
 
   try {
-    // Check user
+    // ✅ validate user in one call
     const user = await UserModel.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
+    // ✅ fetch all products in one query
+    const productIds = products.map((p) => p.productId);
+    const foundProducts = await ProductModel.find({ _id: { $in: productIds } });
+
+    if (foundProducts.length !== productIds.length) {
+      return res.status(404).json({ message: "One or more products not found" });
+    }
+
     let totalAmount = 0;
-    const productUpdates = [];
-    const validatedProducts = [];
+    let previousCompany = null;
 
+    // validate + compute totals
     for (const item of products) {
-      const { productId, quantity, color } = item;
+      const product = foundProducts.find((p) => p._id.toString() === item.productId);
 
-      const product = await ProductModel.findById(productId);
       if (!product) {
-        return res
-          .status(404)
-          .json({ message: `Product ${productId} not found` });
+        return res.status(404).json({ message: `Product ${item.productId} not found` });
       }
 
-      if (product.stocks < quantity) {
-        return res
-          .status(400)
-          .json({ message: `Insufficient stock for ${product.name}` });
+      if (product.stocks < item.quantity) {
+        return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
       }
 
-      if (previousCompany === null) {
+      if (!previousCompany) {
         previousCompany = product.company;
-      } else {
-        if (product.company === previousCompany) {
-          console.log("Same company");
-        } else {
-          console.log("Not the same company");
-          return res.status(401).json({
-            message:
-              "Unauthorized Transaction. Please make sure that items are on the same company or establishments",
-          });
-        }
+      } else if (product.company.toString() !== previousCompany.toString()) {
+        return res.status(401).json({
+          message: "Unauthorized Transaction. Items must be from the same company",
+        });
       }
 
-      previousCompany = product.company;
-
-      totalAmount += product.price * quantity;
-
-      // Store for later use
-      validatedProducts.push({ product, quantity, color });
+      totalAmount += product.price * item.quantity;
     }
 
-    // All validation passed — now deduct stocks and save
-    for (const { product, quantity, color } of validatedProducts) {
-      product.color = color;
-      product.stocks -= quantity;
-      productUpdates.push(product.save());
-    }
-    // Save updated stocks
-    const inventoryProduct = await Promise.all(productUpdates);
+    // ✅ bulk stock updates
+    const bulkOps = products.map((item) => ({
+      updateOne: {
+        filter: { _id: item.productId },
+        update: { $inc: { stocks: -item.quantity } },
+      },
+    }));
+    await ProductModel.bulkWrite(bulkOps);
 
-    // Create order
+    // ✅ update status to "Out of Stock" if stocks = 0
+    const updatedProducts = await ProductModel.find({ _id: { $in: productIds } });
+
+    const statusOps = updatedProducts
+      .filter((p) => p.stocks <= 0) // products that ran out of stock
+      .map((p) => ({
+        updateOne: {
+          filter: { _id: p._id },
+          update: { $set: { status: "Out of Stock" } },
+        },
+      }));
+
+    if (statusOps.length > 0) {
+      await ProductModel.bulkWrite(statusOps);
+    }
+
+    // create order
     const newOrder = new OrderModel({
       user: userId,
       products: products.map((p) => ({
@@ -77,43 +85,35 @@ const AddOrder = async (req, res) => {
         quantity: p.quantity,
         color: p.color,
       })),
-      paymentMethod: paymentMethod === 'otc' ? 'Over the counter' : 'Cash on Delivery',
-      company: inventoryProduct[0].company || inventoryProduct.company,
+      paymentMethod: paymentMethod === "otc" ? "Over the counter" : "Cash on Delivery",
+      company: previousCompany,
       total: totalAmount,
     });
 
     const savedOrder = await newOrder.save();
 
-    // if (inventoryProduct[0]?.company || inventoryProduct?.company) throw new Error("Company is required");
-
     if (savedOrder) {
+      // notify company
       await NotificationModel.create({
         type: "New Order",
         orderId: savedOrder._id,
         userId,
         path: "order",
-        company: inventoryProduct[0]?.company || inventoryProduct?.company,
-        message: `Order #${savedOrder._id} placed by ${userId || "customer"}`
+        company: previousCompany,
+        message: `Order #${savedOrder._id} placed by ${userId || "customer"}`,
       });
 
-
-      const newInventory = new InventoryModel({
+      // inventory log
+      await new InventoryModel({
         user: savedOrder.user,
-        orderId: savedOrder._id,   // ✅ use the saved order’s id
+        orderId: savedOrder._id,
         company: savedOrder.company,
         products: savedOrder.products,
-        // color: savedOrder?.products?.color,
         total: savedOrder.total,
-      });
-
-
-      await newInventory.save();
+      }).save();
     }
 
-    res.status(201).json({
-      success: true,
-      order: savedOrder,
-    });
+    res.status(201).json({ success: true, order: savedOrder });
   } catch (error) {
     console.error("Order Error:", error);
     res.status(500).json({ message: "Internal server error" });
@@ -230,43 +230,35 @@ const UpdateOrderStatus = async (req, res) => {
   }
 };
 
-// USER API
-
+// ---------------------------
+// CHECKOUT APIs (kept same)
+// ---------------------------
 const AddCheckOut = async (req, res) => {
-  const { userId, productId, color } = req.body;
+  const { userId, productId, color, quantity = 1 } = req.body;
+
   try {
-    // check if user id and product are valid
-    const validateUser = await UserModel.findById(userId);
+    // validate user & product
+    const [validateUser, validateProduct] = await Promise.all([
+      UserModel.findById(userId),
+      ProductModel.findById(productId),
+    ]);
 
-    const validateProduct = await ProductModel.findById(productId);
+    if (!validateProduct) return res.status(404).json({ message: `Product ${productId} not found` });
+    if (!validateUser) return res.status(404).json({ message: `User ${userId} not found` });
 
-    if (!validateProduct) {
-      return res
-        .status(404)
-        .json({ message: `Product ${productId} not found` });
-    }
+    // ✅ single DB call with upsert
+    const checkoutItem = await CheckOutModel.findOneAndUpdate(
+      { user: userId, product: productId, color },         // match
+      { $inc: { quantity } },                              // increase quantity
+      { new: true, upsert: true, setDefaultsOnInsert: true } // if not exist → create
+    );
 
-    if (!validateUser) {
-      return res
-        .status(404)
-        .json({ message: `User ${userId} not found` });
-    }
-
-    const finalCheckout = await new CheckOutModel({
-      user: userId,
-      // add qty to payload
-      product: productId,
-      color
-    });
-
-    const storeRecord = await finalCheckout.save();
-
-    res.status(200).json({ success: true, body: storeRecord });
+    res.status(200).json({ success: true, body: checkoutItem });
   } catch (error) {
-    console.log(error);
+    console.error("AddCheckOut Error:", error);
     res.status(400).json({ error: error.message });
   }
-}
+};
 
 const GetAllCheckoutPerUser = async (req, res) => {
   try {
