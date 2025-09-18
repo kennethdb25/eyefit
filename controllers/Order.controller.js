@@ -38,7 +38,7 @@ const AddOrder = async (req, res) => {
       }
 
       if (product.stocks < item.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for ${product.name}` });
+        return res.status(400).json({ message: `Insufficient stock for ${product?.brand}` });
       }
 
       if (!previousCompany) {
