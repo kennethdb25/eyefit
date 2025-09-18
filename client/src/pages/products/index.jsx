@@ -24,6 +24,7 @@ const Products = () => {
   const [form] = Form.useForm();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [loadingButton, setLoadingButton] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
   const [fileList, setFileList] = useState([]);
@@ -175,7 +176,6 @@ const Products = () => {
       // Filter by date range
       if (dateRange && dateRange.length === 2) {
         const [start, end] = dateRange;
-        console.log(filteredData);
         filteredData = filteredData.filter((item) => {
           const createdAt = dayjs(item.createdAt);
           return (
@@ -233,7 +233,9 @@ const Products = () => {
   ).length;
 
   const onConfirm = () => {
-    form.submit();
+    if (!loadingButton) {
+      form.submit();
+    }
   };
 
   useEffect(() => {
@@ -342,6 +344,8 @@ const Products = () => {
         setIsModalVisible={setIsModalVisible}
         fileList={fileList}
         setFileList={setFileList}
+        loadingButton={loadingButton}
+        setLoadingButton={setLoadingButton}
       />
 
       <GenerateReportModal

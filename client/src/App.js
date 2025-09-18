@@ -55,7 +55,6 @@ function App() {
       if (res.status === 401 || !res || !location.pathname === "/") {
         console.log(res);
       } else {
-        console.log(res);
         console.log("Verified User");
         setLoginData(res);
         history("/home");

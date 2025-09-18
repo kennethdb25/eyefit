@@ -37,7 +37,6 @@ const Inventory = () => {
   };
 
   const handleOpenModal = (record) => {
-    console.log(record);
     setSelectedOrder(record);
     setIsModalOpen(true);
   };
@@ -159,8 +158,6 @@ const Inventory = () => {
 
   // Helper to get nested value
   const getNestedValue = (obj, path) => {
-    // console.log(obj);
-    // console.log(path);
     return path.split(".").reduce((acc, key) => acc && acc[key], obj);
   };
 
@@ -215,7 +212,6 @@ const Inventory = () => {
         // fallback if no products
         const row = {};
         fields.forEach((field) => {
-          console.log(field);
           row[field.label] = getNestedValue(item, field.value);
         });
         reportData.push(row);

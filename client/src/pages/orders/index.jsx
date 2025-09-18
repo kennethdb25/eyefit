@@ -88,7 +88,6 @@ const Orders = () => {
   };
 
   const handleOpenModal = (record) => {
-    console.log(record);
     setSelectedOrder(record);
     setIsModalOpen(true);
   };
@@ -298,7 +297,9 @@ const Orders = () => {
             >
               <button
                 hidden={
-                  record?.status === "Shipped" || record?.status === "Completed"
+                  record?.status === "Shipped" ||
+                  record?.status === "Cancelled" ||
+                  record?.status === "Completed"
                     ? true
                     : false
                 }
@@ -329,8 +330,6 @@ const Orders = () => {
 
   // Helper to get nested value
   const getNestedValue = (obj, path) => {
-    // console.log(obj);
-    // console.log(path);
     return path.split(".").reduce((acc, key) => acc && acc[key], obj);
   };
 
@@ -383,7 +382,6 @@ const Orders = () => {
         // fallback if no products
         const row = {};
         fields.forEach((field) => {
-          console.log(field);
           row[field.label] = getNestedValue(item, field.value);
         });
         reportData.push(row);

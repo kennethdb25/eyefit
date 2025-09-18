@@ -178,7 +178,9 @@ const Appointments = () => {
             >
               <button
                 hidden={
-                  record?.status === "Rejected" || record?.status === "Accepted"
+                  record?.status === "Rejected" ||
+                  record?.status === "Accepted" ||
+                  record?.status === "Cancelled"
                     ? true
                     : false
                 }
@@ -219,7 +221,6 @@ const Appointments = () => {
       // Filter by date range
       if (dateRange && dateRange.length === 2) {
         const [start, end] = dateRange;
-        console.log(filteredData);
         filteredData = filteredData.filter((item) => {
           const createdAt = dayjs(item.createdAt);
           return (

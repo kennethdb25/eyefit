@@ -49,8 +49,6 @@ function Header({ OpenSidebar, setData }) {
           setLastNotifId(latest?._id);
         }
       }
-      // console.log(json);
-      // console.log(items);
       // if (json?.body?.length > items?.length) {
       //   // New notification detected
       //   const newNotif = json.body[json.body.length - 1];
@@ -121,7 +119,6 @@ function Header({ OpenSidebar, setData }) {
         fetchData();
         setUnread(0);
       }
-      console.log(json);
     } catch (error) {
       console.error("Fetch failed:", error);
     } finally {

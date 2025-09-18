@@ -11,52 +11,58 @@ const AddAccountModal = ({
   fetchData,
   isEdit,
   editingRecord,
+  loadingButton,
+  setLoadingButton,
 }) => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const onFinish = async (values) => {
-    console.log(isEdit);
+    try {
+      setLoadingButton(true); // disable button
 
-    if (!isEdit) {
-      const newData = await fetch("/api/user/registration", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-      });
-
-      const res = await newData.json();
-
-      if (res.success) {
-        messageApi.success("Account Added Successfully");
-        form.resetFields();
-        onClose();
-        fetchData();
-      } else {
-        messageApi.error(res?.error);
-      }
-    } else {
-      const data = await fetch(
-        `/api/user/account/edit?userId=${editingRecord._id}`,
-        {
-          method: "PUT",
+      if (!isEdit) {
+        const newData = await fetch("/api/user/registration", {
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify(values),
-        }
-      );
-      const res = await data.json();
+        });
 
-      if (res.success) {
-        messageApi.success("Account Updated Successfully");
-        form.resetFields();
-        onClose();
-        fetchData();
+        const res = await newData.json();
+
+        if (res.success) {
+          messageApi.success("Account Added Successfully");
+          form.resetFields();
+          onClose();
+          fetchData();
+        } else {
+          messageApi.error(res?.error);
+        }
       } else {
-        messageApi.error(res?.error);
+        const data = await fetch(
+          `/api/user/account/edit?userId=${editingRecord._id}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(values),
+          }
+        );
+        const res = await data.json();
+
+        if (res.success) {
+          messageApi.success("Account Updated Successfully");
+          form.resetFields();
+          onClose();
+          fetchData();
+        } else {
+          messageApi.error(res?.error);
+        }
       }
+    } finally {
+      setLoadingButton(false); // re-enable button
     }
   };
 
@@ -73,7 +79,12 @@ const AddAccountModal = ({
         <Button key="cancel" onClick={() => onClose()}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={() => onConfirm()}>
+        <Button
+          key="submit"
+          type="primary"
+          loading={loadingButton}
+          onClick={() => onConfirm()}
+        >
           {isEdit ? "Update Account" : "Add New Account"}
         </Button>,
       ]}

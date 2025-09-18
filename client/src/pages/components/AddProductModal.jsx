@@ -30,6 +30,8 @@ const AddProductModal = ({
   editingRecord,
   fileList,
   setFileList,
+  loadingButton,
+  setLoadingButton,
 }) => {
   const { loginData, setLoginData } = useContext(LoginContext);
   const [uploadChange, setUploadChange] = useState(false);
@@ -41,7 +43,10 @@ const AddProductModal = ({
   };
 
   const onFinish = async (values) => {
-    if (isEdit) {
+    try {
+      setLoadingButton(true); // disable button
+
+      // your validation checks...
       if (
         (values.stocks === 0 && values.status === "In Stock") ||
         (values.stocks > 0 && values.status !== "In Stock")
@@ -49,11 +54,12 @@ const AddProductModal = ({
         messageApi.info("Invalid Input!");
         return;
       }
+
       const newData = new FormData();
-      console.log(values.images);
       values.images?.fileList.forEach((file) => {
         newData.append("images", file.originFileObj);
       });
+
       newData.append("productName", values.productName);
       newData.append("brand", values.brand);
       newData.append("model", values.model);
@@ -64,59 +70,25 @@ const AddProductModal = ({
       newData.append("company", loginData.body.company);
       newData.append("colors", JSON.stringify(values.colors || []));
 
-      const data = await fetch(
-        `/api/product/edit?publicId=${editingRecord.productPublicId}`,
-        {
-          method: "PUT",
-          body: newData,
-        }
-      );
+      const url = isEdit
+        ? `/api/product/edit?publicId=${editingRecord.productPublicId}`
+        : "/api/product/add";
+
+      const method = isEdit ? "PUT" : "POST";
+
+      const data = await fetch(url, { method, body: newData });
       const res = await data.json();
-      console.log(res);
 
       if (res.success) {
-        messageApi.success("Product Updated Successfully");
+        messageApi.success(
+          isEdit ? "Product Updated Successfully" : "Product Added Successfully"
+        );
         form.resetFields();
         onClose();
         fetchData();
       }
-    } else {
-      if (
-        (values.stocks === 0 && values.status === "In Stock") ||
-        (values.stocks > 0 && values.status !== "In Stock")
-      ) {
-        messageApi.info("Invalid Input!");
-        return;
-      }
-      const newData = new FormData();
-      values.images?.fileList.forEach((file) => {
-        newData.append("images", file.originFileObj);
-      });
-      newData.append("productName", values.productName);
-      newData.append("brand", values.brand);
-      newData.append("model", values.model);
-      newData.append("price", values.price);
-      newData.append("stocks", values.stocks);
-      newData.append("featured", values?.featured ? values?.featured : true);
-      newData.append("rating", values.rating);
-      newData.append("status", values.status);
-      newData.append("company", loginData.body.company);
-      newData.append("colors", JSON.stringify(values.colors || []));
-
-      const data = await fetch("/api/product/add", {
-        method: "POST",
-        body: newData,
-      });
-
-      const res = await data.json();
-      console.log(res);
-
-      if (res.success) {
-        messageApi.success("Product Added Successfully");
-        form.resetFields();
-        onClose();
-        fetchData();
-      }
+    } finally {
+      setLoadingButton(false); // re-enable button
     }
   };
 
@@ -146,7 +118,12 @@ const AddProductModal = ({
         <Button key="cancel" onClick={() => onClose()}>
           Cancel
         </Button>,
-        <Button key="submit" type="primary" onClick={() => onConfirm()}>
+        <Button
+          key="submit"
+          type="primary"
+          loading={loadingButton}
+          onClick={() => onConfirm()}
+        >
           {isEdit ? "Update Product" : "Add New Product"}
         </Button>,
       ]}
@@ -239,7 +216,15 @@ const AddProductModal = ({
                     { required: true, message: "Please enter the price" },
                   ]}
                 >
-                  <InputNumber min={0} prefix="Php" style={{ width: "100%" }} />
+                  <Input
+                    prefix="Php"
+                    style={{ width: "100%" }}
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
@@ -250,7 +235,14 @@ const AddProductModal = ({
                     { required: true, message: "Please enter stock quantity" },
                   ]}
                 >
-                  <InputNumber min={0} style={{ width: "100%" }} />
+                  <Input
+                    style={{ width: "100%" }}
+                    onKeyPress={(e) => {
+                      if (!/[0-9]/.test(e.key)) {
+                        e.preventDefault();
+                      }
+                    }}
+                  />
                 </Form.Item>
               </Col>
               <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
@@ -266,7 +258,7 @@ const AddProductModal = ({
             <Row gutter={12}>
               <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
                 <Form.Item
-                  name="color"
+                  name="colors"
                   label="Color Variant"
                   rules={[
                     {

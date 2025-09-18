@@ -14,6 +14,7 @@ const Setting = () => {
   const [loading, setLoading] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editingRecord, setEditingRecord] = useState(null);
+  const [loadingButton, setLoadingButton] = useState(false);
 
   const { loginData, setLoginData } = useContext(LoginContext);
 
@@ -267,6 +268,8 @@ const Setting = () => {
         isEdit={isEdit}
         editingRecord={editingRecord}
         setIsModalVisible={setIsModalVisible}
+        loadingButton={loadingButton}
+        setLoadingButton={setLoadingButton}
       />
     </main>
   );
