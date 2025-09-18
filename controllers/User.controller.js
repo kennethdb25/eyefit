@@ -83,7 +83,7 @@ const AddUser = async (req, res) => {
     const newUser = new UserModel({
       name: name.toUpperCase(),
       email,
-      contact,
+      contact: `+63${contact}`,
       userType: "USER",
       acctStatus: "ACTIVE",
       address: address.toUpperCase(),
