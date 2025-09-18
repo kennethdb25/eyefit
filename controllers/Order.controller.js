@@ -34,11 +34,11 @@ const AddOrder = async (req, res) => {
       const product = foundProducts.find((p) => p._id.toString() === item.productId);
 
       if (!product) {
-        return res.status(404).json({ message: `Product ${item.productId} not found` });
+        return res.status(404).json({ message: `Product ${item.model} not found` });
       }
 
       if (product.stocks < item.quantity) {
-        return res.status(400).json({ message: `Insufficient stock for ${product?.brand}` });
+        return res.status(400).json({ message: `Insufficient stock for ${product?.model}` });
       }
 
       if (!previousCompany) {
