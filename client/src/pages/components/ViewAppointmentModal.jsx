@@ -1,5 +1,7 @@
 import { Modal, Form, Input, Button, Select, Row, Col } from "antd";
 import moment from "moment";
+import { FaTimes, FaCheck, FaBan } from "react-icons/fa";
+import "./design.css";
 
 const { Option } = Select;
 
@@ -7,10 +9,6 @@ const inputStyle = {
   color: "#000", // darker text
   backgroundColor: "#f5f5f5", // light gray background
   fontWeight: "500",
-};
-
-const buttonStyle = {
-  marginRight: "10px",
 };
 
 const ViewAppointmentModal = ({
@@ -21,53 +19,43 @@ const ViewAppointmentModal = ({
 }) => {
   return (
     <Modal
-      title="Appointment Details"
+      title="APPOINTMENT DETAILS"
       open={isVisible}
       width={1200}
       onCancel={onClose}
       footer={[
-        <Button key="cancel" onClick={() => onClose()} style={buttonStyle}>
+        <Button
+          key="cancel"
+          className="modal-btn cancel-btn"
+          onClick={onClose}
+          icon={<FaTimes />}
+        >
           Cancel
         </Button>,
-        <button
+        <Button
           key="reject"
           hidden={
             appointment?.status === "Rejected" ||
             appointment?.status === "Accepted"
-              ? true
-              : false
           }
+          className="modal-btn reject-btn"
           onClick={() => handleUpdateStatus("Rejected", appointment?._id)}
-          style={{
-            backgroundColor: "#ff4d4f",
-            color: "#fff",
-            border: "none",
-            padding: "6px 16px",
-            borderRadius: "4px",
-            marginRight: "10px",
-          }}
+          icon={<FaBan />}
         >
           Reject
-        </button>,
-        <button
+        </Button>,
+        <Button
           key="accept"
           hidden={
             appointment?.status === "Rejected" ||
             appointment?.status === "Accepted"
-              ? true
-              : false
           }
+          className="modal-btn accept-btn"
           onClick={() => handleUpdateStatus("Accepted", appointment?._id)}
-          style={{
-            backgroundColor: "#52c41a",
-            color: "#fff",
-            border: "none",
-            padding: "6px 16px",
-            borderRadius: "4px",
-          }}
+          icon={<FaCheck />}
         >
           Accept
-        </button>,
+        </Button>,
       ]}
     >
       <Form layout="vertical">

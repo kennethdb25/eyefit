@@ -6,7 +6,10 @@ const GetInventoryPerCompany = async (req, res) => {
 
         const allOrder = await InventoryModel.find({ company })
             .populate("user") // optional: if you also want full user data
-            .populate("products.product"); // <-- this populates product details
+            .populate("products.product")
+            .sort({ createdAt: -1 }) // ✅ consistent ordering (optional)
+            .lean(); // ✅ big performance boost (plain JS objects)
+
 
         return res.status(200).json({ success: true, body: allOrder });
     } catch (error) {

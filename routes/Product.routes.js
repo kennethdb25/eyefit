@@ -12,8 +12,8 @@ const {
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-ProductRouter.post("/api/product/add", upload.array("images", 10), AddProduct);
-ProductRouter.put("/api/product/edit", upload.array("images", 10), EditProduct);
+ProductRouter.post("/api/product/add", upload.any(), AddProduct);
+ProductRouter.put("/api/product/edit", upload.any(), EditProduct);
 ProductRouter.get("/api/product", GetAllProductByCompany);
 ProductRouter.get("/api/product/search", SearchAvailableProduct);
 

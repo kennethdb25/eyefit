@@ -1,15 +1,24 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import { useState, useContext, useEffect } from "react";
-import { Form, Table, Tag, message, Button } from "antd";
-import { ReloadOutlined, PlusOutlined } from "@ant-design/icons";
+import { useState, useContext, useEffect, useRef } from "react";
+import { Form, Table, Tag, message, Button, Input, Space } from "antd";
+import {
+  ReloadOutlined,
+  PlusOutlined,
+  SearchOutlined,
+  FilterFilled,
+  EditOutlined,
+} from "@ant-design/icons";
 import AddProductModal from "../components/AddProductModal";
 import GenerateReportModal from "../components/GenerateReportModal";
 import { LoginContext } from "../../context/LoginContext";
 import { DatabaseOutlined } from "@ant-design/icons";
+import { FaBoxOpen, FaExclamationTriangle, FaBan } from "react-icons/fa";
 import Papa from "papaparse";
 import dayjs from "dayjs";
 import moment from "moment";
+import Highlighter from "react-highlight-words";
+import "./product.css";
 
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
@@ -31,6 +40,9 @@ const Products = () => {
 
   const { loginData, setLoginData } = useContext(LoginContext);
   const [messageApi, contextHolder] = message.useMessage();
+  const searchInput = useRef(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
 
   const fetchData = async () => {
     setLoading(true); // Start loading
@@ -53,8 +65,24 @@ const Products = () => {
     setIsModalVisible(true);
   };
 
+  const normalizeProduct = (product) => {
+    return {
+      ...product,
+      variants: product.variants.map((variant, idx) => ({
+        color: variant.color,
+        image: variant.images.map((img, i) => ({
+          uid: img.publicId || `${idx}-${i}`,
+          name: img.url.split("/").pop(),
+          status: "done",
+          url: img.url,
+        })), // <-- just an array
+      })),
+    };
+  };
+
   const showEditModal = (record) => {
-    form.setFieldsValue(record);
+    console.log(record);
+    form.setFieldsValue(normalizeProduct(record));
     setEditingRecord(record);
     setIsEdit(true);
     setIsModalVisible(true);
@@ -66,6 +94,97 @@ const Products = () => {
     setIsModalVisible(false);
     setFileList([]);
   };
+
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText("");
+  };
+
+  const getNestedValueSearchProps = (record, dataIndex) => {
+    if (Array.isArray(dataIndex)) {
+      return dataIndex.reduce(
+        (acc, key) => (acc && acc[key] !== undefined ? acc[key] : null),
+        record
+      );
+    }
+    return record[dataIndex];
+  };
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+    }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${
+            Array.isArray(dataIndex) ? dataIndex.join(".") : dataIndex
+          }`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 100 }}
+          >
+            Search
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              clearFilters && handleReset(clearFilters);
+              setSearchText("");
+              setSearchedColumn(null);
+              confirm({ closeDropdown: true });
+            }}
+          >
+            Reset
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+    ),
+    onFilter: (value, record) => {
+      const text = getNestedValueSearchProps(record, dataIndex);
+      return text
+        ? text.toString().toLowerCase().includes(value.toLowerCase())
+        : false;
+    },
+    render: (text, record) => {
+      const value = getNestedValueSearchProps(record, dataIndex);
+
+      return searchedColumn === JSON.stringify(dataIndex) ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={value ? value.toString() : ""}
+        />
+      ) : (
+        value
+      );
+    },
+  });
 
   const columns = [
     {
@@ -131,6 +250,13 @@ const Products = () => {
       ],
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       filterSearch: true,
+      filterIcon: (filtered) => (
+        <FilterFilled
+          style={{
+            color: filtered ? "#ffffff" : "#ffffff", // always white
+          }}
+        />
+      ),
       // onFilter: (value, record) => record.status.includes(value),
     },
     {
@@ -139,12 +265,18 @@ const Products = () => {
       render: (_, record) => (
         <>
           <div className="action-buttons">
-            <button
-              className="edit-button"
+            <Button
+              style={{
+                backgroundColor: "#52c41a",
+                borderColor: "#52c41a",
+                color: "#fff",
+              }}
+              type="default"
+              icon={<EditOutlined />}
               onClick={() => showEditModal(record)}
             >
-              EDIT
-            </button>
+              Edit
+            </Button>
           </div>
         </>
       ),
@@ -251,45 +383,17 @@ const Products = () => {
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
         {/* Count Cards */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "start",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "green",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+          <div className="status-cards">
+            <div className="status-card in-stock">
+              <FaBoxOpen className="status-icon" />
               <strong>In Stock: {inStockCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "orange",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+            <div className="status-card out-stock">
+              <FaExclamationTriangle className="status-icon" />
               <strong>Out of Stock: {outOfStockCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "red",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+            <div className="status-card discontinued">
+              <FaBan className="status-icon" />
               <strong>Discontinued: {discontinuedCount}</strong>
             </div>
           </div>
@@ -324,6 +428,7 @@ const Products = () => {
       </div>
       <div className="main-content">
         <Table
+          className="custom-table"
           dataSource={data}
           columns={columns}
           loading={loading}

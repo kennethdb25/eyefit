@@ -8,4 +8,5 @@ module.exports = {
   cloudName: "dy8eiwffk",
   apiKey: "724226155627925",
   apiSecret: "-5HGFP0rHL5mGlcbFEUXs45NGlY",
+  paymongoSecretKey: "sk_test_WP1FKzGNZwVitiwi53116N7X",
 };

@@ -6,7 +6,9 @@ const {
   GetAllAppointmentPerCompany,
   GetAllValidAppointmentPerCompany,
   UpdateAppointmentStatus,
-  GetAllAppointmentPerUser
+  GetAllAppointmentPerUser,
+  AddUpdateApptConfig,
+  GetCompanyApptConfig
 } = require("../controllers/Appointment.controller");
 
 AppointmentRouter.get("/api/available/business", GetAvailableBusinessForAppointment)
@@ -20,5 +22,9 @@ AppointmentRouter.put("/api/appointments/status/:id", UpdateAppointmentStatus);
 AppointmentRouter.get("/api/users/appointments", GetAllAppointmentPerUser);
 
 AppointmentRouter.get("/api/validate/appointment", GetAllValidAppointmentPerCompany);
+
+AppointmentRouter.post("/api/appointment-config", AddUpdateApptConfig);
+
+AppointmentRouter.get("/api/appointment-config/:company", GetCompanyApptConfig);
 
 module.exports = AppointmentRouter;

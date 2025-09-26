@@ -1,0 +1,79 @@
+/* Shared button styles */
+.modal-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.modal-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+
+/* Specific buttons */
+.cancel-btn {
+  background: #d9d9d9 !important;
+  color: #333 !important;
+  border: none !important;
+}
+
+.accept-btn {
+  background: #52c41a !important;
+  color: #fff !important;
+  border: none !important;
+}
+
+/* Close button */
+.close-btn {
+  background-color: #f0f0f0 !important;
+  color: #333 !important;
+  border: 1px solid #d9d9d9 !important;
+}
+.close-btn:hover {
+  background-color: #e4e4e4 !important;
+}
+
+/* Reject button */
+.reject-btn {
+  background-color: #ff4d4f !important;
+  color: #fff !important;
+  border: none !important;
+}
+.reject-btn:hover {
+  background-color: #d9363e !important;
+}
+
+/* Process button */
+.process-btn {
+  background-color: #1890ff !important;
+  color: #fff !important;
+  border: none !important;
+}
+.process-btn:hover {
+  background-color: #096dd9 !important;
+}
+
+/* Shipped button */
+.shipped-btn {
+  background-color: #13c2c2 !important;
+  color: #fff !important;
+  border: none !important;
+}
+.shipped-btn:hover {
+  background-color: #08979c !important;
+}
+
+/* Complete button */
+.complete-btn {
+  background-color: #52c41a !important;
+  color: #fff !important;
+  border: none !important;
+}
+.complete-btn:hover {
+  background-color: #3fa012 !important;
+}

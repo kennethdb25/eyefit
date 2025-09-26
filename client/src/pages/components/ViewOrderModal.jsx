@@ -9,6 +9,13 @@ import {
   Image,
   Divider,
 } from "antd";
+import {
+  MdClose,
+  MdCancel,
+  MdPlayCircleOutline,
+  MdLocalShipping,
+  MdCheckCircle,
+} from "react-icons/md";
 
 const { Title, Text } = Typography;
 
@@ -29,95 +36,69 @@ const ViewOrderModal = (props) => {
           <Button
             key="close"
             onClick={() => setIsModalOpen(false)}
-            style={buttonStyle}
+            className="modal-btn close-btn"
+            icon={<MdClose />}
           >
             Close
           </Button>,
-          <button
+
+          <Button
             key="reject"
             hidden={
               selectedOrder?.status === "Completed" ||
               selectedOrder?.status === "Shipped" ||
               selectedOrder?.status === "Cancelled"
-                ? true
-                : false
             }
             onClick={() => handleUpdateStatus("Cancelled", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#ff4d4f",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
+            className="modal-btn reject-btn"
+            icon={<MdCancel />}
           >
             Cancel
-          </button>,
-          <button
+          </Button>,
+
+          <Button
             key="process"
             hidden={
               selectedOrder?.status === "Shipped" ||
               selectedOrder?.status === "Processing" ||
               selectedOrder?.status === "Cancelled" ||
               selectedOrder?.status === "Completed"
-                ? true
-                : false
             }
             onClick={() => handleUpdateStatus("Processing", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#52c41a",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-            }}
+            className="modal-btn process-btn"
+            icon={<MdPlayCircleOutline />}
           >
             Process
-          </button>,
-          <button
+          </Button>,
+
+          <Button
             key="shipped"
             hidden={
               selectedOrder?.status === "Shipped" ||
               selectedOrder?.status === "Pending" ||
               selectedOrder?.status === "Cancelled" ||
               selectedOrder?.status === "Completed"
-                ? true
-                : false
             }
             onClick={() => handleUpdateStatus("Shipped", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#52c41a",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
+            className="modal-btn shipped-btn"
+            icon={<MdLocalShipping />}
           >
             Shipped
-          </button>,
-          <button
+          </Button>,
+
+          <Button
             key="complete"
             hidden={
               selectedOrder?.status === "Pending" ||
               selectedOrder?.status === "Cancelled" ||
               selectedOrder?.status === "Completed"
-                ? true
-                : false
             }
             onClick={() => handleUpdateStatus("Completed", selectedOrder?._id)}
-            style={{
-              backgroundColor: "#52c41a",
-              color: "#fff",
-              border: "none",
-              padding: "6px 16px",
-              borderRadius: "4px",
-              marginRight: "10px",
-            }}
+            className="modal-btn complete-btn"
+            icon={<MdCheckCircle />}
           >
             Complete
-          </button>,
+          </Button>,
         ]}
         width={900}
         style={{ top: 20 }}

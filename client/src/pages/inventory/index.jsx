@@ -2,7 +2,18 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useContext, useEffect } from "react";
 import { Table, Tag, Button, message } from "antd";
-import { ReloadOutlined, DatabaseOutlined } from "@ant-design/icons";
+import {
+  ReloadOutlined,
+  DatabaseOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
+import {
+  FaTimesCircle,
+  FaHourglassHalf,
+  FaCogs,
+  FaTruck,
+  FaCheckCircle,
+} from "react-icons/fa";
 import { LoginContext } from "../../context/LoginContext";
 import moment from "moment";
 import ViewInventoryModal from "../components/ViewInventoryModal";
@@ -10,6 +21,7 @@ import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
 import { Pagination } from "../components/Pagination/Pagination";
+import "./delivery.css";
 
 const Inventory = () => {
   const [data, setData] = useState([]);
@@ -43,18 +55,6 @@ const Inventory = () => {
 
   const columns = [
     {
-      title: "Order Id",
-      dataIndex: "orderId",
-      key: "orderId",
-      className: "blue-text",
-    },
-    {
-      title: "Customer Id",
-      dataIndex: ["user", "_id"],
-      key: ["user", "_id"],
-      className: "blue-text",
-    },
-    {
       title: "Name",
       dataIndex: ["user", "name"],
       key: ["user", "name"],
@@ -63,6 +63,12 @@ const Inventory = () => {
       title: "Email",
       dataIndex: ["user", "email"],
       key: ["user", "email"],
+    },
+    {
+      title: "Address",
+      dataIndex: ["user", "address"],
+      key: ["user", "address"],
+      sName: "blue-text",
     },
     {
       title: "Contact Number",
@@ -128,13 +134,20 @@ const Inventory = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <div className="action-buttons">
-            <button
-              className="edit-button"
+          <div className="action-buttons flex gap-3">
+            {/* View Button */}
+            <Button
+              style={{
+                backgroundColor: "#52c41a",
+                borderColor: "#52c41a",
+                color: "#fff",
+              }}
+              type="primary"
+              icon={<EyeOutlined />}
               onClick={() => handleOpenModal(record)}
             >
-              VIEW
-            </button>
+              View
+            </Button>
           </div>
         </>
       ),
@@ -266,68 +279,26 @@ const Inventory = () => {
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
         {/* Count Cards */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "start",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "red",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+          <div className="status-cards">
+            <div className="status-card cancelled">
+              <FaTimesCircle className="status-icon" />
               <strong>Cancelled: {cancelledCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "purple",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+            <div className="status-card pending">
+              <FaHourglassHalf className="status-icon" />
               <strong>Pending: {pendingCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "orange",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Processing:{processingCount} </strong>
+            <div className="status-card processing">
+              <FaCogs className="status-icon" />
+              <strong>Processing: {processingCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "blue",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Shipped:{shippedCount} </strong>
+            <div className="status-card shipped">
+              <FaTruck className="status-icon" />
+              <strong>Shipped: {shippedCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "green",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Completed:{completedCount} </strong>
+            <div className="status-card completed">
+              <FaCheckCircle className="status-icon" />
+              <strong>Completed: {completedCount}</strong>
             </div>
           </div>
           <div className="action-buttons">
@@ -362,6 +333,7 @@ const Inventory = () => {
 
       <div className="main-content">
         <Table
+          className="custom-table"
           dataSource={data}
           columns={columns}
           loading={loading}

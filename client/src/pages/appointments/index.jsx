@@ -1,15 +1,26 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
-import React, { useState, useContext, useEffect } from "react";
-import { Table, Tag, message, Button, Popconfirm } from "antd";
-import { ReloadOutlined, DatabaseOutlined } from "@ant-design/icons";
+import React, { useState, useContext, useEffect, useRef } from "react";
+import { Table, Tag, message, Button, Popconfirm, Input, Space } from "antd";
+import {
+  ReloadOutlined,
+  DatabaseOutlined,
+  SearchOutlined,
+  FilterFilled,
+  CloseCircleOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
+import { FaCheckCircle, FaClock, FaTimesCircle } from "react-icons/fa";
 import { LoginContext } from "../../context/LoginContext";
+import Highlighter from "react-highlight-words";
 import moment from "moment";
 import ViewAppointmentModal from "../components/ViewAppointmentModal";
 import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
 import { Pagination } from "../components/Pagination/Pagination";
+import "./appointment.css";
+import AppointmentConfigModal from "../components/AppointmentConfig/ApppointmentConfig";
 
 const Appointments = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -20,6 +31,9 @@ const Appointments = () => {
 
   const { loginData, setLoginData } = useContext(LoginContext);
   const [messageApi, contextHolder] = message.useMessage();
+  const searchInput = useRef(null);
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
 
   const fetchData = async () => {
     setLoading(true); // Start loading
@@ -78,11 +92,103 @@ const Appointments = () => {
     messageApi.error("Click on No");
   };
 
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setSearchText(selectedKeys[0]);
+    setSearchedColumn(dataIndex);
+  };
+
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText("");
+  };
+
+  const getNestedValueSearchProps = (record, dataIndex) => {
+    if (Array.isArray(dataIndex)) {
+      return dataIndex.reduce(
+        (acc, key) => (acc && acc[key] !== undefined ? acc[key] : null),
+        record
+      );
+    }
+    return record[dataIndex];
+  };
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+    }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${
+            Array.isArray(dataIndex) ? dataIndex.join(".") : dataIndex
+          }`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{ width: 100 }}
+          >
+            Search
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              clearFilters && handleReset(clearFilters);
+              setSearchText("");
+              setSearchedColumn(null);
+              confirm({ closeDropdown: true });
+            }}
+          >
+            Reset
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+    ),
+    onFilter: (value, record) => {
+      const text = getNestedValueSearchProps(record, dataIndex);
+      return text
+        ? text.toString().toLowerCase().includes(value.toLowerCase())
+        : false;
+    },
+    render: (text, record) => {
+      const value = getNestedValueSearchProps(record, dataIndex);
+
+      return searchedColumn === JSON.stringify(dataIndex) ? (
+        <Highlighter
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
+          searchWords={[searchText]}
+          autoEscape
+          textToHighlight={value ? value.toString() : ""}
+        />
+      ) : (
+        value
+      );
+    },
+  });
+
   const columns = [
     {
       title: "Customer Name",
       dataIndex: "customerName",
       key: "customerName",
+      ...getColumnSearchProps("customerName"),
       className: "blue-text",
     },
     {
@@ -154,6 +260,13 @@ const Appointments = () => {
       ],
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       filterSearch: true,
+      filterIcon: (filtered) => (
+        <FilterFilled
+          style={{
+            color: filtered ? "#ffffff" : "#ffffff", // always white
+          }}
+        />
+      ),
       // onFilter: (value, record) => record.status.includes(value),
     },
     {
@@ -161,13 +274,22 @@ const Appointments = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <div className="action-buttons">
-            <button
-              className="edit-button"
+          <div className="action-buttons flex gap-3">
+            {/* View Button */}
+            <Button
+              style={{
+                backgroundColor: "#52c41a",
+                borderColor: "#52c41a",
+                color: "#fff",
+              }}
+              type="primary"
+              icon={<EyeOutlined />}
               onClick={() => handleOpenUpdateModal(record)}
             >
-              VIEW
-            </button>
+              View
+            </Button>
+
+            {/* Reject Button with Popconfirm */}
             <Popconfirm
               title="Update Appointment Status"
               description="Are you sure to reject this Appointment?"
@@ -176,18 +298,18 @@ const Appointments = () => {
               okText="Yes"
               cancelText="No"
             >
-              <button
+              <Button
+                danger
+                type="primary"
+                icon={<CloseCircleOutlined />}
                 hidden={
                   record?.status === "Rejected" ||
                   record?.status === "Accepted" ||
                   record?.status === "Cancelled"
-                    ? true
-                    : false
                 }
-                className="delete-button"
               >
-                REJECT
-              </button>
+                Reject
+              </Button>
             </Popconfirm>
           </div>
         </>
@@ -277,6 +399,9 @@ const Appointments = () => {
   const rejectedCount = data.filter(
     (item) => item.status === "Rejected"
   ).length;
+  const cancelledCount = data.filter(
+    (item) => item.status === "Cancelled"
+  ).length;
 
   useEffect(() => {
     fetchData();
@@ -291,49 +416,26 @@ const Appointments = () => {
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
         {/* Count Cards */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "start",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "green",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+          <div className="status-cards">
+            <div className="status-card accepted">
+              <FaCheckCircle className="status-icon" />
               <strong>Accepted: {acceptedCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "blue",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+            <div className="status-card pending">
+              <FaClock className="status-icon" />
               <strong>Pending: {pendingCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "red",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+            <div className="status-card rejected">
+              <FaTimesCircle className="status-icon" />
+              <strong>Cancelled: {cancelledCount}</strong>
+            </div>
+            <div className="status-card rejected">
+              <FaTimesCircle className="status-icon" />
               <strong>Rejected: {rejectedCount}</strong>
             </div>
           </div>
           <div className="action-buttons">
+            <AppointmentConfigModal />,
             <Button
               icon={<DatabaseOutlined style={{ fontSize: "16px" }} />}
               onClick={() => setGenerateModalVisible(true)}
@@ -356,6 +458,7 @@ const Appointments = () => {
       </div>
       <div className="main-content">
         <Table
+          className="custom-table"
           dataSource={data}
           columns={columns}
           loading={loading}

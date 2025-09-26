@@ -9,12 +9,9 @@ import {
   Image,
   Divider,
 } from "antd";
+import { MdCancel } from "react-icons/md";
 
 const { Title, Text } = Typography;
-
-const buttonStyle = {
-  marginRight: "10px",
-};
 
 const ViewInventoryModal = (props) => {
   const { isModalOpen, setIsModalOpen, selectedOrder } = props;
@@ -28,7 +25,8 @@ const ViewInventoryModal = (props) => {
           <Button
             key="close"
             onClick={() => setIsModalOpen(false)}
-            style={buttonStyle}
+            className="modal-btn cancel-btn"
+            icon={<MdCancel />}
           >
             Close
           </Button>,

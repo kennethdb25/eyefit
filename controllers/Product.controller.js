@@ -3,71 +3,87 @@ const cloudinary = require("../config/cloudinary/cloudinary");
 const { v4: uuidv4 } = require("uuid");
 const streamifier = require("streamifier");
 
+// 🔹 Reusable Cloudinary upload helper
+const uploadToCloudinary = (file) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "EYEFIT", public_id: uuidv4() },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve({ publicId: result.public_id, url: result.secure_url });
+      }
+    );
+    streamifier.createReadStream(file.buffer).pipe(stream);
+  });
+};
+
 const AddProduct = async (req, res) => {
-  const {
-    productName,
-    brand,
-    model,
-    company,
-    price,
-    stocks,
-    featured,
-    status,
-    colors,
-  } = req.body;
-
-  const parsedColors = colors ? JSON.parse(colors) : [];
   try {
-    const uploadPromises = req.files.map((file) => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "EYEFIT",
-            public_id: `${uuidv4()}`,
-          },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve({
-              public_id: result.public_id,
-              url: result.secure_url,
-            });
-          }
-        );
-        streamifier.createReadStream(file.buffer).pipe(stream);
-      });
+    const {
+      productName,
+      brand,
+      model,
+      company,
+      price,
+      stocks,
+      featured,
+      variants, // JSON string from frontend
+    } = req.body;
+
+    const parsedVariants = variants ? JSON.parse(variants) : [];
+
+    // group uploaded files by variant index
+    const filesByVariant = {};
+    (req.files || []).forEach((file) => {
+      const match = file.fieldname.match(/variants\[(\d+)\]\[images\]/);
+      if (match) {
+        const index = match[1];
+        filesByVariant[index] = file; // only allow one image per variant
+      }
     });
 
-    const uploadedImages = await Promise.all(uploadPromises);
+    // upload each file and merge with variant
+    const finalVariants = await Promise.all(
+      parsedVariants.map(async (variant, index) => {
+        const file = filesByVariant[index];
+        let uploadedImage = null;
 
-    const finalRecord = await new ProductModel({
-      productName: productName,
-      company: company,
-      brand: brand,
-      model: model,
-      price: price,
-      stocks: stocks,
-      featured: featured,
+        if (file) {
+          uploadedImage = await uploadToCloudinary(file);
+        }
+
+        return {
+          color: variant.color,
+          images: uploadedImage ? [uploadedImage] : [], // enforce array with max 1
+        };
+      })
+    );
+
+    const newProduct = await ProductModel.create({
+      productName,
+      company,
+      brand,
+      model,
+      price,
+      stocks,
+      featured,
       rating: 0,
-      status: status,
-      colors: parsedColors, // ✅ save as array
-      // change product imageURL and publicId to array of Object that will accept multiple object details for images
-      productImgURL: uploadedImages[0]?.url,
-      productPublicId: uploadedImages[0]?.public_id,
+      status: stocks > 0 ? "In Stock" : "Out of Stock",
+      variants: finalVariants,
     });
 
-    const storeRecord = await finalRecord.save();
-
-    res.status(200).json({ success: true, body: storeRecord });
+    res.status(200).json({ success: true, body: newProduct });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 };
 
+
+// 🔹 Edit Product
 const EditProduct = async (req, res) => {
   try {
     const publicId = req.query.publicId || "";
-
     const {
       productName,
       brand,
@@ -78,58 +94,52 @@ const EditProduct = async (req, res) => {
       featured,
       rating,
       status,
-      colors,
+      variants, // JSON string from frontend
     } = req.body;
 
-    const parsedColors = colors ? JSON.parse(colors) : [];
+    const parsedVariants = variants ? JSON.parse(variants) : [];
 
-    console.log(colors);
-    console.log(parsedColors);
-
-    const product = await ProductModel.findOne({ productPublicId: publicId });
+    const product = await ProductModel.findOne({ _id: publicId });
     if (!product) {
       return res.status(404).json({ error: "Product not found." });
     }
 
-    // Helper to upload a single image to Cloudinary
-    const uploadToCloudinary = (file) => {
-      return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          {
-            folder: "EYEFIT",
-            public_id: uuidv4(),
-          },
-          (error, result) => {
-            if (error) return reject(error);
-            resolve({
-              public_id: result.public_id,
-              url: result.secure_url,
-            });
-          }
-        );
-        streamifier.createReadStream(file.buffer).pipe(stream);
-      });
-    };
-
-    // If there are uploaded files, handle image replacement
-    if (req.files && req.files.length > 0) {
-      // Delete old image
-      if (product.productPublicId) {
-        await cloudinary.uploader.destroy(product.productPublicId);
+    // group uploaded files by variant index
+    const filesByVariant = {};
+    (req.files || []).forEach((file) => {
+      const match = file.fieldname.match(/variants\[(\d+)\]\[images\]/);
+      if (match) {
+        const index = match[1];
+        filesByVariant[index] = file; // one file per variant
       }
+    });
 
-      // Upload new image(s)
-      const uploadedImages = await Promise.all(
-        req.files.map((file) => uploadToCloudinary(file))
-      );
+    // build updated variants
+    const updatedVariants = await Promise.all(
+      parsedVariants.map(async (variant, index) => {
+        const file = filesByVariant[index];
+        let newImage = null;
 
-      // Replace image fields with first uploaded image
-      const { url, public_id } = uploadedImages[0];
-      product.productImgURL = url;
-      product.productPublicId = public_id;
-    }
+        if (file) {
+          // destroy old Cloudinary image if exists
+          const oldImage = product.variants?.[index]?.images?.[0];
+          if (oldImage?.publicId) {
+            await cloudinary.uploader.destroy(oldImage.publicId);
+          }
 
-    // Always update shared product fields
+          // upload new image
+          newImage = await uploadToCloudinary(file);
+        }
+
+        return {
+          color: variant.color,
+          images: newImage
+            ? [newImage] // overwrite with new image
+            : product.variants?.[index]?.images || [], // keep old image if no new one
+        };
+      })
+    );
+
     Object.assign(product, {
       productName,
       brand,
@@ -139,56 +149,69 @@ const EditProduct = async (req, res) => {
       stocks,
       featured,
       rating,
-      status,
-      colors: parsedColors, // ✅ save as array
+      status: stocks > 0 ? "In Stock" : status,
+      variants: updatedVariants,
     });
 
     const updatedProduct = await product.save();
     res.status(200).json({ success: true, body: updatedProduct });
   } catch (error) {
-    console.log(error);
+    console.error(error);
     res.status(400).json({ error: error.message });
   }
 };
 
+
+// 🔹 Get Products by Company
 const GetAllProductByCompany = async (req, res) => {
-  const company = req.query.company || "";
   try {
-    const product = await ProductModel.find({ company });
-    res.status(200).json({ success: true, body: product });
+    const company = req.query.company || "";
+    const products = await ProductModel.find({ company });
+    res.status(200).json({ success: true, body: products });
   } catch (error) {
-    console.log(error);
     res.status(400).json({ error: error.message });
   }
 };
 
-// User End point
+// 🔹 Get Available Products (not discontinued)
 const GetAvailableProduct = async (req, res) => {
   try {
-    const getAvailableProduct = await ProductModel.find({ status: { $nin: ['Discontinued'] } });
-    res.status(200).json({ success: true, body: getAvailableProduct });
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ error: error.message });
-  }
-}
-
-const SearchAvailableProduct = async (req, res) => {
-  try {
-    const query = req.query.q || ""; // Get search term
     const products = await ProductModel.find({
-      $or: [
-        { productName: { $regex: query, $options: "i" } },
-        { brand: { $regex: query, $options: "i" } },
-        { model: { $regex: query, $options: "i" } },
-        { company: { $regex: query, $options: "i" } },
-      ], status: { $nin: ['Discontinued'] }
+      status: { $nin: ["Discontinued"] },
     });
     res.status(200).json({ success: true, body: products });
   } catch (error) {
-    console.log(error);
     res.status(400).json({ error: error.message });
   }
-}
+};
 
-module.exports = { AddProduct, EditProduct, GetAllProductByCompany, GetAvailableProduct, SearchAvailableProduct };
+// 🔹 Search Products (available only)
+const SearchAvailableProduct = async (req, res) => {
+  try {
+    const query = req.query.q || "";
+    const filters = query
+      ? {
+        $or: [
+          { productName: { $regex: query, $options: "i" } },
+          { brand: { $regex: query, $options: "i" } },
+          { model: { $regex: query, $options: "i" } },
+          { company: { $regex: query, $options: "i" } },
+        ],
+        status: { $nin: ["Discontinued"] },
+      }
+      : { status: { $nin: ["Discontinued"] } };
+
+    const products = await ProductModel.find(filters);
+    res.status(200).json({ success: true, body: products });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  AddProduct,
+  EditProduct,
+  GetAllProductByCompany,
+  GetAvailableProduct,
+  SearchAvailableProduct,
+};

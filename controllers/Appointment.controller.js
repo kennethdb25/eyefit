@@ -1,9 +1,11 @@
 const AccountModel = require("../models/AccountModel");
 const AppointmentModel = require("../models/AppointmentModel");
+const AppointmentConfigModel = require("../models/AppointmentConfigModel");
 
 const GetAvailableBusinessForAppointment = async (req, res) => {
   try {
-    const AvailableBusiness = await AccountModel.aggregate([
+    // ✅ distinct is faster than aggregation for unique field values
+    const companies = await AccountModel.aggregate([
       {
         '$match': {
           'userType': 'BUSINESS USER'
@@ -13,31 +15,56 @@ const GetAvailableBusinessForAppointment = async (req, res) => {
           '_id': '$company'
         }
       }, {
+        '$lookup': {
+          'from': 'appointmentconfigs',
+          'localField': '_id',
+          'foreignField': 'company',
+          'as': 'availableConfig'
+        }
+      }, {
+        '$match': {
+          'availableConfig': {
+            '$ne': []
+          }
+        }
+      }, {
         '$project': {
-          '_id': 0,
-          'company': '$_id'
+          'company': '$_id',
+          '_id': 0
         }
       }
     ]);
 
-    return res.status(200).json({ success: true, body: AvailableBusiness });
+    return res.status(200).json({
+      success: true,
+      body: companies,
+    });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ error: error.message });
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
-}
+};
 
 const AddAnAppointment = async (req, res) => {
   try {
-    const { name, address, gender, description, email, phone, date, time, store } =
-      req.body;
+    const {
+      name,
+      address,
+      gender,
+      description,
+      email,
+      phone,
+      date,
+      time,
+      store,
+    } = req.body;
 
     const appointment = new AppointmentModel({
-      customerName: name,
-      address,
-      contact: phone,
+      customerName: name.toUpperCase(),
+      address: address.toUpperCase(),
+      gender: gender.toUpperCase(),
+      contact: `+63${phone}`,
       email,
-      gender,
       order: description ? description.toUpperCase() : "N.A",
       date,
       time,
@@ -46,12 +73,13 @@ const AddAnAppointment = async (req, res) => {
 
     const savedAppointment = await appointment.save();
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       data: savedAppointment,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       status: 500,
       message: error.message,
     });
@@ -62,26 +90,32 @@ const GetAllAppointmentPerCompany = async (req, res) => {
   try {
     const company = req.query.company || "";
 
-    const allAppointments = await AppointmentModel.find({ company });
+    const allAppointments = await AppointmentModel.find({ company })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.status(200).json({ success: true, body: allAppointments });
   } catch (error) {
-    console.log(error);
-    return res.status(404).json(error);
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
 };
-
 
 const GetAllValidAppointmentPerCompany = async (req, res) => {
   try {
     const company = req.query.company || "";
 
-    const allValidAppointments = await AppointmentModel.find({ company, status: { $nin: ['Cancelled', 'Rejected'] } });
+    const allValidAppointments = await AppointmentModel.find({
+      company,
+      status: { $nin: ["Cancelled", "Rejected"] },
+    })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.status(200).json({ success: true, body: allValidAppointments });
   } catch (error) {
-    console.log(error);
-    return res.status(404).json(error);
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
 };
 
@@ -89,11 +123,10 @@ const UpdateAppointmentStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  // Only allow "Accepted" or "Rejected"
   if (!["Accepted", "Rejected", "Cancelled"].includes(status)) {
     return res.status(400).json({
       success: false,
-      message: "Invalid status. Must be 'Accepted' or 'Rejected'.",
+      message: "Invalid status. Must be 'Accepted', 'Rejected', or 'Cancelled'.",
     });
   }
 
@@ -111,31 +144,59 @@ const UpdateAppointmentStatus = async (req, res) => {
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: updatedAppointment,
     });
   } catch (error) {
-    res.status(500).json({
+    console.error(error);
+    return res.status(500).json({
       success: false,
       message: error.message,
     });
   }
 };
 
-
 const GetAllAppointmentPerUser = async (req, res) => {
   try {
     const email = req.query.email || "";
 
-    const allAppointments = await AppointmentModel.find({ email }).sort({ createdAt: -1 });
+    const allAppointments = await AppointmentModel.find({ email })
+      .sort({ createdAt: -1 })
+      .lean();
 
     return res.status(200).json({ success: true, body: allAppointments });
   } catch (error) {
-    console.log(error);
-    return res.status(404).json(error);
+    console.error(error);
+    return res.status(500).json({ error: error.message });
   }
 };
+
+const AddUpdateApptConfig = async (req, res) => {
+  try {
+    const { company, workingDays, workingHours, exceptions } = req.body;
+
+    const config = await AppointmentConfigModel.findOneAndUpdate(
+      { company },
+      { workingDays, workingHours, exceptions },
+      { new: true, upsert: true }
+    );
+
+    return res.status(200).json({ success: true, body: config });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
+
+const GetCompanyApptConfig = async (req, res) => {
+  try {
+    const config = await AppointmentConfigModel.findOne({ company: req?.params?.company });
+    return res.status(200).json({ success: true, body: config });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+}
 
 module.exports = {
   GetAvailableBusinessForAppointment,
@@ -143,5 +204,7 @@ module.exports = {
   GetAllAppointmentPerCompany,
   GetAllValidAppointmentPerCompany,
   UpdateAppointmentStatus,
-  GetAllAppointmentPerUser
+  GetAllAppointmentPerUser,
+  AddUpdateApptConfig,
+  GetCompanyApptConfig
 };

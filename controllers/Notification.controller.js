@@ -5,31 +5,33 @@ const GetNotificationPerCompany = async (req, res) => {
         const company = req.query.company || "";
         const limit = 10;
 
-        const notifs = await NotificationModel.find({ company, type: "New Order" }).sort({ createdAt: -1 }).limit(limit) || [];
+        const notifs = await NotificationModel.find({ company, type: "New Order" })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean(); // ✅ faster, plain objects
 
-        return res.status(200).json({ success: true, body: notifs });
+        return res.status(200).json({ success: true, body: notifs || [] });
     } catch (error) {
-        console.log(error);
-        return res.status(404).json(error);
+        console.error(error);
+        return res.status(500).json({ error: error.message });
     }
-}
-
+};
 
 const MarkAllNotificationsAsReadPerCompany = async (req, res) => {
     try {
         const company = req.query.company || "";
 
         const notifs = await NotificationModel.updateMany(
-            { company, read: false },    // filter: unread + specific company
-            { $set: { read: true } }     // update
+            { company, read: false },
+            { $set: { read: true } }
         );
 
         return res.status(200).json({ success: true, body: notifs });
     } catch (error) {
-        console.log(error);
-        return res.status(404).json(error);
+        console.error(error);
+        return res.status(500).json({ error: error.message });
     }
-}
+};
 
 const MarkAsReadNotification = async (req, res) => {
     const id = req.query.notificationId || "";
@@ -46,7 +48,7 @@ const MarkAsReadNotification = async (req, res) => {
             id,
             { companyRead: true },
             { new: true }
-        )
+        ).lean();
 
         if (!notificationMarkAsRead) {
             return res.status(404).json({
@@ -55,34 +57,35 @@ const MarkAsReadNotification = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: notificationMarkAsRead,
         });
     } catch (error) {
-        res.status(500).json({
+        console.error(error);
+        return res.status(500).json({
             success: false,
             message: error.message,
         });
     }
-}
-
+};
 
 const GetNotificationPerUser = async (req, res) => {
     try {
         const id = req.query.userId || "";
         const limit = 20;
 
-        const notifs = await NotificationModel.find({ userId: id }).sort({ createdAt: -1 }).limit(limit) || [];
+        const notifs = await NotificationModel.find({ userId: id })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean();
 
-        return res.status(200).json({ success: true, body: notifs });
+        return res.status(200).json({ success: true, body: notifs || [] });
     } catch (error) {
-        console.log(error);
-        return res.status(404).json(error);
+        console.error(error);
+        return res.status(500).json({ error: error.message });
     }
-}
-
-
+};
 
 const MarkAsReadNotificationPerUser = async (req, res) => {
     const id = req.query.notificationId || "";
@@ -99,7 +102,7 @@ const MarkAsReadNotificationPerUser = async (req, res) => {
             id,
             { userRead: true },
             { new: true }
-        )
+        ).lean();
 
         if (!notificationMarkAsRead) {
             return res.status(404).json({
@@ -108,16 +111,23 @@ const MarkAsReadNotificationPerUser = async (req, res) => {
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             data: notificationMarkAsRead,
         });
     } catch (error) {
-        res.status(500).json({
+        console.error(error);
+        return res.status(500).json({
             success: false,
             message: error.message,
         });
     }
-}
+};
 
-module.exports = { GetNotificationPerCompany, MarkAllNotificationsAsReadPerCompany, MarkAsReadNotification, GetNotificationPerUser, MarkAsReadNotificationPerUser };
+module.exports = {
+    GetNotificationPerCompany,
+    MarkAllNotificationsAsReadPerCompany,
+    MarkAsReadNotification,
+    GetNotificationPerUser,
+    MarkAsReadNotificationPerUser,
+};

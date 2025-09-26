@@ -6,7 +6,17 @@ import {
   ReloadOutlined,
   DatabaseOutlined,
   SearchOutlined,
+  FilterFilled,
+  StopOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
+import {
+  FaTimesCircle,
+  FaHourglassHalf,
+  FaCogs,
+  FaTruck,
+  FaCheckCircle,
+} from "react-icons/fa";
 import { LoginContext } from "../../context/LoginContext";
 import Highlighter from "react-highlight-words";
 import moment from "moment";
@@ -15,6 +25,7 @@ import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
 import { Pagination } from "../components/Pagination/Pagination";
+import "./orders.css";
 
 const Orders = () => {
   const [data, setData] = useState([]);
@@ -108,6 +119,16 @@ const Orders = () => {
     setSearchText("");
   };
 
+  const getNestedValueSearchProps = (record, dataIndex) => {
+    if (Array.isArray(dataIndex)) {
+      return dataIndex.reduce(
+        (acc, key) => (acc && acc[key] !== undefined ? acc[key] : null),
+        record
+      );
+    }
+    return record[dataIndex];
+  };
+
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
       setSelectedKeys,
@@ -115,23 +136,18 @@ const Orders = () => {
       confirm,
       clearFilters,
     }) => (
-      <div
-        style={{
-          padding: 8,
-        }}
-      >
+      <div style={{ padding: 8 }}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder={`Search ${
+            Array.isArray(dataIndex) ? dataIndex.join(".") : dataIndex
+          }`}
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
           }
           onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
-          style={{
-            marginBottom: 8,
-            display: "block",
-          }}
+          style={{ marginBottom: 8, display: "block" }}
         />
         <Space>
           <Button
@@ -139,9 +155,7 @@ const Orders = () => {
             onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
             icon={<SearchOutlined />}
             size="small"
-            style={{
-              width: 100,
-            }}
+            style={{ width: 100 }}
           >
             Search
           </Button>
@@ -150,11 +164,9 @@ const Orders = () => {
             size="small"
             onClick={() => {
               clearFilters && handleReset(clearFilters);
-              setSearchText(selectedKeys[0]);
-              setSearchedColumn(dataIndex);
-              confirm({
-                closeDropdown: true,
-              });
+              setSearchText("");
+              setSearchedColumn(null);
+              confirm({ closeDropdown: true });
             }}
           >
             Reset
@@ -163,58 +175,48 @@ const Orders = () => {
       </div>
     ),
     filterIcon: (filtered) => (
-      <SearchOutlined
-        style={{
-          color: "white",
-        }}
-      />
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownVisibleChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
+    onFilter: (value, record) => {
+      const text = getNestedValueSearchProps(record, dataIndex);
+      return text
+        ? text.toString().toLowerCase().includes(value.toLowerCase())
+        : false;
     },
-    render: (text) =>
-      searchedColumn === dataIndex ? (
+    render: (text, record) => {
+      const value = getNestedValueSearchProps(record, dataIndex);
+
+      return searchedColumn === JSON.stringify(dataIndex) ? (
         <Highlighter
-          highlightStyle={{
-            backgroundColor: "#ffc069",
-            padding: 0,
-          }}
+          highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
           searchWords={[searchText]}
           autoEscape
-          textToHighlight={text ? text.toString() : ""}
+          textToHighlight={value ? value.toString() : ""}
         />
       ) : (
-        text
-      ),
+        value
+      );
+    },
   });
 
   const columns = [
     {
-      title: "Order Id",
-      dataIndex: "_id",
-      key: "_id",
-      className: "blue-text",
-      ...getColumnSearchProps("_id"),
-    },
-    {
-      title: "Customer Id",
-      dataIndex: ["user", "_id"],
-      key: ["user", "_id"],
-      className: "blue-text",
-    },
-    {
       title: "Name",
       dataIndex: ["user", "name"],
-      key: ["user", "name"],
+      key: "customer name",
+      ...getColumnSearchProps(["user", "name"]),
     },
     {
       title: "Email",
       dataIndex: ["user", "email"],
-      key: ["user", "email"],
+      key: "customer email",
+      ...getColumnSearchProps(["user", "email"]),
+    },
+    {
+      title: "Address",
+      dataIndex: ["user", "address"],
+      key: ["user", "address"],
+      sName: "blue-text",
     },
     {
       title: "Contact Number",
@@ -273,6 +275,13 @@ const Orders = () => {
       ],
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       filterSearch: true,
+      filterIcon: (filtered) => (
+        <FilterFilled
+          style={{
+            color: filtered ? "#ffffff" : "#ffffff", // always white
+          }}
+        />
+      ),
       // onFilter: (value, record) => record.status.includes(value),
     },
     {
@@ -280,13 +289,22 @@ const Orders = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <div className="action-buttons">
-            <button
-              className="edit-button"
+          <div className="action-buttons flex gap-3">
+            {/* View Button */}
+            <Button
+              style={{
+                backgroundColor: "#52c41a",
+                borderColor: "#52c41a",
+                color: "#fff",
+              }}
+              type="primary"
+              icon={<EyeOutlined />}
               onClick={() => handleOpenModal(record)}
             >
-              VIEW
-            </button>
+              View
+            </Button>
+
+            {/* Cancel Button with Popconfirm */}
             <Popconfirm
               title="Update Order Status"
               description="Are you sure to cancel this Order?"
@@ -295,18 +313,18 @@ const Orders = () => {
               okText="Yes"
               cancelText="No"
             >
-              <button
+              <Button
+                danger
+                type="primary"
+                icon={<StopOutlined />}
                 hidden={
                   record?.status === "Shipped" ||
                   record?.status === "Cancelled" ||
                   record?.status === "Completed"
-                    ? true
-                    : false
                 }
-                className="delete-button"
               >
-                CANCEL
-              </button>
+                Cancel
+              </Button>
             </Popconfirm>
           </div>
         </>
@@ -436,68 +454,26 @@ const Orders = () => {
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
         {/* Count Cards */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "start",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "red",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+          <div className="status-cards">
+            <div className="status-card cancelled">
+              <FaTimesCircle className="status-icon" />
               <strong>Cancelled: {cancelledCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "purple",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
+            <div className="status-card order-pending">
+              <FaHourglassHalf className="status-icon" />
               <strong>Pending: {pendingCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "orange",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Processing:{processingCount} </strong>
+            <div className="status-card processing">
+              <FaCogs className="status-icon" />
+              <strong>Processing: {processingCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "blue",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Shipped:{shippedCount} </strong>
+            <div className="status-card shipped">
+              <FaTruck className="status-icon" />
+              <strong>Shipped: {shippedCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "green",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Completed:{completedCount} </strong>
+            <div className="status-card completed">
+              <FaCheckCircle className="status-icon" />
+              <strong>Completed: {completedCount}</strong>
             </div>
           </div>
           <div className="action-buttons">
@@ -532,6 +508,7 @@ const Orders = () => {
 
       <div className="main-content">
         <Table
+          className="custom-table"
           dataSource={data}
           columns={columns}
           loading={loading}

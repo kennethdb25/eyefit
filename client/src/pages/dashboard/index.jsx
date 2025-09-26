@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
+
 import {
-  BsFillArchiveFill,
-  BsFillGrid3X3GapFill,
-  BsPeopleFill,
-  BsFillBellFill,
+  BsBoxSeam, // Products
+  BsCartCheckFill, // Orders
+  BsPeopleFill, // Customers
+  BsXCircleFill, // Cancelled
 } from "react-icons/bs";
 import {
   LineChart,
@@ -113,6 +114,8 @@ export default function Dashboard() {
         params.push(`company=${loginData.body.company}`);
       }
 
+      params.push(`status=Completed`);
+
       if (params.length > 0) {
         url += params.join("&");
       }
@@ -141,17 +144,19 @@ export default function Dashboard() {
           <div className="card">
             <div className="card-inner">
               <h3>PRODUCTS</h3>
-              <BsFillArchiveFill className="card_icon" />
+              <BsBoxSeam className="card_icon" />
             </div>
             <h1>{summary.totalProducts}</h1>
           </div>
+
           <div className="card">
             <div className="card-inner">
               <h3>ORDERS</h3>
-              <BsFillGrid3X3GapFill className="card_icon" />
+              <BsCartCheckFill className="card_icon" />
             </div>
             <h1>{summary.totalOrders}</h1>
           </div>
+
           <div className="card">
             <div className="card-inner">
               <h3>CUSTOMERS</h3>
@@ -159,10 +164,11 @@ export default function Dashboard() {
             </div>
             <h1>{summary.totalCustomers}</h1>
           </div>
+
           <div className="card">
             <div className="card-inner">
               <h3>CANCELLED</h3>
-              <BsFillBellFill className="card_icon" />
+              <BsXCircleFill className="card_icon" />
             </div>
             <h1>{summary.totalCancelled}</h1>
           </div>
@@ -171,18 +177,20 @@ export default function Dashboard() {
 
       {loginData?.body?.userType !== "ADMIN USER" ? (
         <div className="dashboard">
-          <h1>Order Analytics Dashboard</h1>
-          <div className="filters">
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => setStartDate(e.target.value)}
-            />
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => setEndDate(e.target.value)}
-            />
+          <div className="dashboard-header">
+            <h1>Order Analytics Dashboard</h1>
+            <div className="filters">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+              />
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+              />
+            </div>
           </div>
           {/* Charts */}
           <div className="charts">
@@ -199,6 +207,7 @@ export default function Dashboard() {
                 </LineChart>
               </ResponsiveContainer>
             </div>
+
             <div className="chart">
               <h2>Items Sold Over Time</h2>
               <ResponsiveContainer width="100%" height={300}>
@@ -212,19 +221,20 @@ export default function Dashboard() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
-          <div className="chart" style={{ marginBottom: "20px" }}>
-            <h2>TOP SELLING</h2>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={topProducts}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="totalQuantity" fill="#ff8042" />
-              </BarChart>
-            </ResponsiveContainer>
+
+            <div className="chart">
+              <h2>Top Selling Product</h2>
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={topProducts}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip dataKey="brand" />
+                  <Legend />
+                  <Bar dataKey="totalQuantity" fill="#ff8042" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
           <div className="table-container">
             <div className="order-details">

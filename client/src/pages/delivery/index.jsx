@@ -2,7 +2,13 @@
 /* eslint-disable no-unused-vars */
 import { useState, useContext, useEffect } from "react";
 import { Table, Tag, message, Button } from "antd";
-import { ReloadOutlined, DatabaseOutlined } from "@ant-design/icons";
+import {
+  ReloadOutlined,
+  DatabaseOutlined,
+  FilterFilled,
+  EyeOutlined,
+} from "@ant-design/icons";
+import { FaTruck, FaCheckCircle } from "react-icons/fa";
 import { LoginContext } from "../../context/LoginContext";
 import moment from "moment";
 import ViewDeliveryModal from "../components/ViewDeliveryModal";
@@ -10,6 +16,7 @@ import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
 import { Pagination } from "../components/Pagination/Pagination";
+import "./delivery.css";
 
 const Delivery = () => {
   const [data, setData] = useState([]);
@@ -43,18 +50,6 @@ const Delivery = () => {
 
   const columns = [
     {
-      title: "Order Id",
-      dataIndex: ["order", "_id"],
-      key: ["order", "_id"],
-      className: "blue-text",
-    },
-    {
-      title: "Customer Id",
-      dataIndex: ["order", "user", "_id"],
-      key: ["order", "user", "_id"],
-      className: "blue-text",
-    },
-    {
       title: "Name",
       dataIndex: ["order", "user", "name"],
       key: ["order", "user", "name"],
@@ -63,6 +58,12 @@ const Delivery = () => {
       title: "Email",
       dataIndex: ["order", "user", "email"],
       key: ["order", "user", "email"],
+    },
+    {
+      title: "Address",
+      dataIndex: ["order", "user", "address"],
+      key: ["order", "user", "address"],
+      sName: "blue-text",
     },
     {
       title: "Contact Number",
@@ -121,6 +122,13 @@ const Delivery = () => {
       ],
       onFilter: (value, record) => record.status.indexOf(value) === 0,
       filterSearch: true,
+      filterIcon: (filtered) => (
+        <FilterFilled
+          style={{
+            color: filtered ? "#ffffff" : "#ffffff", // always white
+          }}
+        />
+      ),
       // onFilter: (value, record) => record.status.includes(value),
     },
     {
@@ -128,13 +136,20 @@ const Delivery = () => {
       key: "action",
       render: (_, record) => (
         <>
-          <div className="action-buttons">
-            <button
-              className="edit-button"
+          <div className="action-buttons flex gap-3">
+            {/* View Button */}
+            <Button
+              style={{
+                backgroundColor: "#52c41a",
+                borderColor: "#52c41a",
+                color: "#fff",
+              }}
+              type="primary"
+              icon={<EyeOutlined />}
               onClick={() => handleOpenModal(record)}
             >
-              VIEW
-            </button>
+              View
+            </Button>
           </div>
         </>
       ),
@@ -252,35 +267,14 @@ const Delivery = () => {
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
         {/* Count Cards */}
         <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "start",
-              gap: "10px",
-              marginBottom: "10px",
-            }}
-          >
-            <div
-              style={{
-                backgroundColor: "blue",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Shipped:{shippedCount} </strong>
+          <div className="status-cards">
+            <div className="status-card shipped">
+              <FaTruck className="status-icon" />
+              <strong>Shipped: {shippedCount}</strong>
             </div>
-            <div
-              style={{
-                backgroundColor: "green",
-                padding: "10px 15px",
-                borderRadius: "8px",
-                fontSize: "14px",
-                color: "white",
-              }}
-            >
-              <strong>Completed:{completedCount} </strong>
+            <div className="status-card completed">
+              <FaCheckCircle className="status-icon" />
+              <strong>Completed: {completedCount}</strong>
             </div>
           </div>
           <div className="action-buttons">
@@ -314,6 +308,7 @@ const Delivery = () => {
       </div>
       <div className="main-content">
         <Table
+          className="custom-table"
           dataSource={data}
           columns={columns}
           loading={loading}

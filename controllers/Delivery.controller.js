@@ -11,7 +11,9 @@ const GetAllDeliveryPerCompany = async (req, res) => {
         { path: "user", model: "User" }, // populate user details
         { path: "products.product", model: "ProductInfo" }, // populate each product in products array
       ],
-    });
+    })
+      .sort({ createdAt: -1 }) // ✅ optional: consistent ordering
+      .lean(); // ✅ faster: return plain JS objects
     return res.status(200).json({ success: true, body: allOrder });
   } catch (error) {
     console.log(error);

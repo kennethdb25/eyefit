@@ -11,8 +11,8 @@ const CheckOutModel = require("../models/CheckoutModel");
 // ADD ORDER
 // ---------------------------
 const AddOrder = async (req, res) => {
-  const { userId, products, paymentMethod } = req.body;
-
+  const { userId, products, paymentMethod, paymentDetails } = req.body;
+  console.log(paymentDetails)
   try {
     // ✅ validate user in one call
     const user = await UserModel.findById(userId);
@@ -85,7 +85,12 @@ const AddOrder = async (req, res) => {
         quantity: p.quantity,
         color: p.color,
       })),
-      paymentMethod: paymentMethod === "otc" ? "Over the counter" : "Cash on Delivery",
+      paymentDetails: {
+        paymentReferenceId: paymentDetails?.id || 'N/A',
+        paymentType: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "Cash on Delivery",
+        amount: totalAmount
+      },
+      paymentMethod: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "Cash on Delivery",
       company: previousCompany,
       total: totalAmount,
     });
@@ -120,14 +125,15 @@ const AddOrder = async (req, res) => {
   }
 };
 
+// ---------------------------
+// GET ALL ORDERS PER COMPANY
+// ---------------------------
 const GetAllOrderPerCompany = async (req, res) => {
   try {
     const company = req.query.company || "";
-
     const allOrder = await OrderModel.find({ company })
-      .populate("user") // optional: if you also want full user data
-      .populate("products.product"); // <-- this populates product details
-
+      .populate("user")
+      .populate("products.product");
     return res.status(200).json({ success: true, body: allOrder });
   } catch (error) {
     console.log(error);
@@ -135,98 +141,67 @@ const GetAllOrderPerCompany = async (req, res) => {
   }
 };
 
+// ---------------------------
+// UPDATE ORDER STATUS
+// ---------------------------
 const UpdateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  // Only allow "Cancelled", "Processing", "Shipped" or "Completed"
   if (!["Cancelled", "Processing", "Shipped", "Completed"].includes(status)) {
     return res.status(400).json({
       success: false,
-      message:
-        "Invalid status. Must be 'Cancelled', 'Processing', 'Shipped' or 'Completed'.",
+      message: "Invalid status. Must be 'Cancelled', 'Processing', 'Shipped' or 'Completed'.",
     });
   }
 
   try {
-    const updateOrder = await OrderModel.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true }
-    );
+    const updateOrder = await OrderModel.findByIdAndUpdate(id, { status }, { new: true });
+    if (!updateOrder) return res.status(404).json({ success: false, message: "Order not found" });
 
-    if (!updateOrder) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
+    // update inventory status in one call
+    await InventoryModel.findOneAndUpdate({ orderId: updateOrder._id }, { status });
 
-    const updateInventoryStatus = await InventoryModel.findOne({ orderId: updateOrder._id });
-
-    if (updateInventoryStatus) {
-      const { _id } = updateInventoryStatus;
-
-      await InventoryModel.findByIdAndUpdate(
-        _id,
-        { status },
-        { new: true }
-      );
-    }
-
+    // handle notifications
     if (status === "Shipped") {
-      const { _id, company } = updateOrder;
-
-      const newDelivery = new DeliveryModel({
-        order: _id,
-        company,
-      });
-      await newDelivery.save();
-
+      await new DeliveryModel({ order: updateOrder._id, company: updateOrder.company }).save();
       await NotificationModel.create({
         type: "Shipped Order",
-        orderId: _id,
-        userId: updateOrder?.user,
+        orderId: updateOrder._id,
+        userId: updateOrder.user,
         path: "order",
-        company: company,
-        message: `Order #${updateOrder._id} ship by ${company || "shop"}`
+        company: updateOrder.company,
+        message: `Order #${updateOrder._id} shipped by ${updateOrder.company || "shop"}`,
       });
     }
 
     if (status === "Completed") {
-      const { _id, company } = updateOrder;
-
-      const deliveryRecord = await DeliveryModel.findOne({ order: _id });
-
-      if (deliveryRecord) {
-        await DeliveryModel.findOneAndUpdate(
-          { order: _id }, // match by order reference
-          { status },
-          { new: true }
-        );
-
-
-
-        await NotificationModel.create({
-          type: "Completed Order",
-          orderId: _id,
-          userId: updateOrder?.user,
-          path: "order",
-          company: company,
-          message: `Order #${updateOrder._id} delivered successfully`
-        });
-      }
+      await DeliveryModel.findOneAndUpdate({ order: updateOrder._id }, { status });
+      await NotificationModel.create({
+        type: "Completed Order",
+        orderId: updateOrder._id,
+        userId: updateOrder.user,
+        path: "order",
+        company: updateOrder.company,
+        message: `Order #${updateOrder._id} delivered successfully`,
+      });
     }
 
-    res.status(200).json({
-      success: true,
-      data: updateOrder,
-    });
+    if (status === "Cancelled") {
+      await Promise.all(
+        updateOrder?.products.map((p) =>
+          ProductModel.findByIdAndUpdate(
+            p?.product,
+            { $inc: { stocks: p?.quantity } }, // increment stocks directly
+            { new: true }
+          )
+        )
+      );
+    }
+    // const updateOrder = await OrderModel.findByIdAndUpdate(id, { status }, { new: true });
+    res.status(200).json({ success: true, data: updateOrder });
   } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -263,62 +238,54 @@ const AddCheckOut = async (req, res) => {
 const GetAllCheckoutPerUser = async (req, res) => {
   try {
     const userId = req.query.userId || "";
-
     if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
       return res.status(400).json({ success: false, message: "Invalid or missing userId" });
     }
 
-
-    const allCheckout = await CheckOutModel.find({ user: userId })
-      .populate("user") // optional: if you also want full user data
-      .populate("product"); // <-- this populates product details
-
-
+    const allCheckout = await CheckOutModel.find({ user: userId }).populate("user").populate("product");
     return res.status(200).json({ success: true, body: allCheckout });
   } catch (error) {
     console.log(error);
     return res.status(404).json(error);
   }
-}
+};
 
 const RemoveCheckout = async (req, res) => {
   try {
     const id = req.query.checkoutId || "";
-
     const deleteOne = await CheckOutModel.findByIdAndDelete(id);
 
-    if (deleteOne.deletedCount === 0) {
-      return res.status(404).json({ message: "No records found for this user." });
-    }
+    if (!deleteOne) return res.status(404).json({ message: "No records found for this user." });
 
-    return res.status(200).json({ success: true, message: `Deleted ${deleteOne.deletedCount} record.`, });
+    return res.status(200).json({ success: true, message: "Checkout item deleted." });
   } catch (error) {
     console.log(error);
     return res.status(404).json(error);
   }
-}
+};
 
 const RemoveAllCheckoutPerUser = async (req, res) => {
   try {
     const userId = req.query.userId || "";
-
     const deleteAll = await CheckOutModel.deleteMany({ user: userId });
 
     if (deleteAll.deletedCount === 0) {
       return res.status(404).json({ message: "No records found for this user." });
     }
 
-    return res.status(200).json({ success: true, message: `Deleted ${deleteAll.deletedCount} records for user ${userId}.`, });
+    return res.status(200).json({
+      success: true,
+      message: `Deleted ${deleteAll.deletedCount} records for user ${userId}.`,
+    });
   } catch (error) {
     console.log(error);
     return res.status(404).json(error);
   }
-}
+};
 
 const AddOrSubCheckoutQty = async (req, res) => {
   try {
     const { quantity } = req.body;
-
     if (!quantity || quantity < 1) {
       return res.status(400).json({ message: "Quantity must be at least 1" });
     }
@@ -329,25 +296,20 @@ const AddOrSubCheckoutQty = async (req, res) => {
       { new: true }
     );
 
-    if (!updatedItem) {
-      return res.status(404).json({ message: "Checkout item not found" });
-    }
-
+    if (!updatedItem) return res.status(404).json({ message: "Checkout item not found" });
     res.json(updatedItem);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
-}
-
+};
 
 const GetAllOrderPerUser = async (req, res) => {
   try {
     const id = req.query.userId || "";
-
-    const allOrder = await OrderModel.find({ user: id })
-      .populate("user") // optional: if you also want full user data
-      .populate("products.product"); // <-- this populates product details
-
+    if (!id) {
+      return res.status(404).json({ error: 'Not Found' });
+    }
+    const allOrder = await OrderModel.find({ user: id }).populate("user").populate("products.product");
     return res.status(200).json({ success: true, body: allOrder });
   } catch (error) {
     console.log(error);
@@ -355,4 +317,48 @@ const GetAllOrderPerUser = async (req, res) => {
   }
 };
 
-module.exports = { AddOrder, GetAllOrderPerCompany, UpdateOrderStatus, AddCheckOut, GetAllCheckoutPerUser, RemoveCheckout, RemoveAllCheckoutPerUser, AddOrSubCheckoutQty, GetAllOrderPerUser };
+const CreatePaymentIntent = async (req, res) => {
+  try {
+    const { amount } = req.body; // amount in centavos
+
+    const response = await fetch("https://api.paymongo.com/v1/payment_intents", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Basic " + Buffer.from("sk_test_WP1FKzGNZwVitiwi53116N7X:").toString("base64"),
+      },
+      body: JSON.stringify({
+        data: {
+          attributes: {
+            amount,
+            payment_method_allowed: ["card"],
+            payment_method_options: { card: { request_three_d_secure: "any" } },
+            currency: "PHP",
+          },
+        },
+      }),
+    });
+
+    const data = await response.json();
+
+    return res.status(200).json({ success: true, body: data });
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+    console.log(error)
+    res.status(500).json({ error: "Payment intent creation failed" });
+  }
+}
+
+module.exports = {
+  AddOrder,
+  GetAllOrderPerCompany,
+  UpdateOrderStatus,
+  AddCheckOut,
+  GetAllCheckoutPerUser,
+  RemoveCheckout,
+  RemoveAllCheckoutPerUser,
+  AddOrSubCheckoutQty,
+  GetAllOrderPerUser,
+  CreatePaymentIntent
+};

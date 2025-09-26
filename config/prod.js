@@ -4,4 +4,5 @@ module.exports = {
   cloudName: process.env.CLOUDNAME,
   apiKey: process.env.APIKEY,
   apiSecret: process.env.APISECRET,
+  paymongoSecretKey: process.env.PAYMONGO_SECRET_KEY
 };

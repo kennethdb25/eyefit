@@ -1,23 +1,20 @@
 const mongoose = require("mongoose");
 
+const VariantSchema = new mongoose.Schema({
+  color: { type: String, required: true },
+  images: [
+    {
+      url: { type: String, required: true },
+      publicId: { type: String, required: true },
+    },
+  ],
+});
+
 const ProductSchema = new mongoose.Schema({
   productName: {
     type: String,
     required: [true, "Please provide a name for the product"],
     maxlength: [40, "Name can not be more than 40 characters"],
-  },
-  // change product imageURL and publicId to array of Object that will accept multiple object details for images
-  productImgURL: {
-    type: String,
-    required: true,
-  },
-  productPublicId: {
-    type: String,
-    required: true,
-  },
-  colors: {
-    type: Array,
-    required: true
   },
   brand: {
     type: String,
@@ -43,11 +40,7 @@ const ProductSchema = new mongoose.Schema({
   },
   rating: {
     type: Number,
-    default: 4.5,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now(),
+    default: 0,
   },
   company: {
     type: String,
@@ -56,6 +49,11 @@ const ProductSchema = new mongoose.Schema({
   status: {
     type: String,
     required: true,
+  },
+  variants: [VariantSchema], // ✅ new approach
+  createdAt: {
+    type: Date,
+    default: Date.now,
   },
 });
 
