@@ -6,7 +6,7 @@ const { Title, Paragraph } = Typography;
 
 export default function ForgotPassword() {
   const classes = useStyles();
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [token, setToken] = useState("");
