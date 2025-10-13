@@ -10,6 +10,28 @@ const VariantSchema = new mongoose.Schema({
   ],
 });
 
+const reviewSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User", // assuming you have a User model
+    required: true,
+  },
+  comment: {
+    type: String,
+    required: true,
+  },
+  rating: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 5,
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
 const ProductSchema = new mongoose.Schema({
   productName: {
     type: String,
@@ -38,7 +60,16 @@ const ProductSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
-  rating: {
+  arId: {
+    type: String,
+    required: true
+  },
+  recommended: {
+    type: [String],
+    required: true,
+  },
+  reviews: [reviewSchema],
+  averageRating: {
     type: Number,
     default: 0,
   },

@@ -6,7 +6,8 @@ const {
   EditProduct,
   GetAllProductByCompany,
   GetAvailableProduct,
-  SearchAvailableProduct
+  SearchAvailableProduct,
+  GetAvailableRecommendedProduct
 } = require("../controllers/Product.controller");
 
 const storage = multer.memoryStorage();
@@ -19,5 +20,6 @@ ProductRouter.get("/api/product/search", SearchAvailableProduct);
 
 // USER API
 ProductRouter.get("/api/user/product", GetAvailableProduct);
+ProductRouter.get("/api/user/recommended-product", GetAvailableRecommendedProduct);
 
 module.exports = ProductRouter;

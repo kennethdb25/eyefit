@@ -24,6 +24,8 @@ const AddProduct = async (req, res) => {
       brand,
       model,
       company,
+      recommended,
+      arId,
       price,
       stocks,
       featured,
@@ -31,6 +33,7 @@ const AddProduct = async (req, res) => {
     } = req.body;
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
+    const parsedRecommended = recommended ? JSON.parse(recommended) : [];
 
     // group uploaded files by variant index
     const filesByVariant = {};
@@ -54,7 +57,7 @@ const AddProduct = async (req, res) => {
 
         return {
           color: variant.color,
-          images: uploadedImage ? [uploadedImage] : [], // enforce array with max 1
+          images: uploadedImage ? [] : [], // enforce array with max 1
         };
       })
     );
@@ -65,6 +68,8 @@ const AddProduct = async (req, res) => {
       brand,
       model,
       price,
+      recommended: parsedRecommended,
+      arId,
       stocks,
       featured,
       rating: 0,
@@ -91,6 +96,8 @@ const EditProduct = async (req, res) => {
       company,
       price,
       stocks,
+      recommended,
+      arId,
       featured,
       rating,
       status,
@@ -98,6 +105,7 @@ const EditProduct = async (req, res) => {
     } = req.body;
 
     const parsedVariants = variants ? JSON.parse(variants) : [];
+    const parsedRecommended = recommended ? JSON.parse(recommended) : [];
 
     const product = await ProductModel.findOne({ _id: publicId });
     if (!product) {
@@ -147,6 +155,8 @@ const EditProduct = async (req, res) => {
       company,
       price,
       stocks,
+      recommended: parsedRecommended,
+      arId,
       featured,
       rating,
       status: stocks > 0 ? "In Stock" : status,
@@ -185,6 +195,20 @@ const GetAvailableProduct = async (req, res) => {
   }
 };
 
+// 🔹 Get Available Recommended Products (not discontinued)
+const GetAvailableRecommendedProduct = async (req, res) => {
+  const query = req.query.q || "";
+  try {
+    const products = await ProductModel.find({
+      recommended: query,
+      status: { $nin: ["Discontinued"] },
+    });
+    res.status(200).json({ success: true, body: products });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
 // 🔹 Search Products (available only)
 const SearchAvailableProduct = async (req, res) => {
   try {
@@ -214,4 +238,5 @@ module.exports = {
   GetAllProductByCompany,
   GetAvailableProduct,
   SearchAvailableProduct,
+  GetAvailableRecommendedProduct
 };

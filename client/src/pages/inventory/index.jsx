@@ -21,7 +21,7 @@ import Papa from "papaparse";
 import dayjs from "dayjs";
 import GenerateReportModal from "../components/GenerateReportModal";
 import { Pagination } from "../components/Pagination/Pagination";
-import "./delivery.css";
+import "./inventory.css";
 
 const Inventory = () => {
   const [data, setData] = useState([]);

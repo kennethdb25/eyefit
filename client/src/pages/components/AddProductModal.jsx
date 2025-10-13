@@ -69,6 +69,8 @@ const AddProductModal = ({
       newData.append("productName", values.productName);
       newData.append("brand", values.brand);
       newData.append("model", values.model);
+      newData.append("recommended", JSON.stringify(values.recommended));
+      newData.append("arId", values.arId);
       newData.append("price", values.price);
       newData.append("stocks", values.stocks);
       newData.append("featured", values?.featured ? values?.featured : false);
@@ -272,9 +274,47 @@ const AddProductModal = ({
               </Col>
             </Row>
 
-            {/* Status Switch (only if editing) */}
-            {isEdit && (
-              <Row gutter={12}>
+            <Row gutter={12}>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item
+                  name="arId"
+                  label="3D Glass Identification"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please add the 3D Glass Identification",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
+                <Form.Item
+                  name="recommended"
+                  label="Recommended Face Shape"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please select recommended face shape",
+                    },
+                  ]}
+                >
+                  <Select
+                    mode="multiple"
+                    placeholder="Select recommended face shape"
+                  >
+                    <Select.Option value="Square">Square</Select.Option>
+                    <Select.Option value="Oval">Oval</Select.Option>
+                    <Select.Option value="Round">Round</Select.Option>
+                    <Select.Option value="Diamond">Diamond</Select.Option>
+                    <Select.Option value="Heart">Heart</Select.Option>
+                    <Select.Option value="Unknown">Unknown</Select.Option>
+                  </Select>
+                </Form.Item>
+              </Col>
+              {/* Status Switch (only if editing) */}
+              {isEdit && (
                 <Col xs={{ span: 24 }} md={{ span: 8 }} layout="vertical">
                   <Form.Item
                     name="status"
@@ -304,8 +344,8 @@ const AddProductModal = ({
                     />
                   </Form.Item>
                 </Col>
-              </Row>
-            )}
+              )}
+            </Row>
 
             {/* Dynamic Product Variants */}
             <Form.List

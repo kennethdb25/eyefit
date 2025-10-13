@@ -12,7 +12,6 @@ const CheckOutModel = require("../models/CheckoutModel");
 // ---------------------------
 const AddOrder = async (req, res) => {
   const { userId, products, paymentMethod, paymentDetails } = req.body;
-  console.log(paymentDetails)
   try {
     // ✅ validate user in one call
     const user = await UserModel.findById(userId);
@@ -105,7 +104,7 @@ const AddOrder = async (req, res) => {
         userId,
         path: "order",
         company: previousCompany,
-        message: `Order #${savedOrder._id} placed by ${userId || "customer"}`,
+        message: `Order #${savedOrder._id} placed by ${user.email || "customer"}`,
       });
 
       // inventory log
@@ -350,6 +349,53 @@ const CreatePaymentIntent = async (req, res) => {
   }
 }
 
+const AddOrderReview = async (req, res) => {
+  const { comment, rating, userId } = req.body;
+
+  try {
+    const order = await OrderModel.findByIdAndUpdate(
+      req.params.id,
+      { ratingStatus: true, comment, rating },
+      { new: true }
+    );
+
+    if (!order || !userId) {
+      return res.status(404).json({ error: "Something went wrong!" });
+    }
+
+    const product = await ProductModel.findById(order?.products[0]?.product);
+
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
+
+    const review = {
+      user: userId,
+      comment,
+      rating,
+    };
+
+    product.reviews.push(review);
+
+    product.averageRating =
+      product.reviews.reduce((acc, r) => acc + r.rating, 0) /
+      product.reviews.length;
+
+    await product.save();
+
+    // ✅ Send success response so frontend doesn't hang
+    return res.status(201).json({
+      message: "Review added successfully",
+      product,
+      order,
+    });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+
 module.exports = {
   AddOrder,
   GetAllOrderPerCompany,
@@ -360,5 +406,6 @@ module.exports = {
   RemoveAllCheckoutPerUser,
   AddOrSubCheckoutQty,
   GetAllOrderPerUser,
-  CreatePaymentIntent
+  CreatePaymentIntent,
+  AddOrderReview
 };

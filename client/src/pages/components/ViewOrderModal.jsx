@@ -187,7 +187,7 @@ const ViewOrderModal = (props) => {
                     <Row gutter={12}>
                       <Col span={8}>
                         <Image
-                          src={item.product.productImgURL}
+                          src={item.product?.variants[0]?.images[0]?.url}
                           alt={item.product.productName}
                           style={{
                             borderRadius: 8,

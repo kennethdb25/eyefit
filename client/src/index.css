@@ -371,6 +371,10 @@ code {
   color: white !important;
 }
 
+.ant-table-placeholder .ant-empty-description {
+  color: #000 !important; /* black text */
+}
+
 .ant-select-disabled .ant-select-selector {
   background-color: #f5f5f5 !important;
   color: #000 !important;

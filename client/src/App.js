@@ -13,6 +13,7 @@ import Inventory from "./pages/inventory";
 import Setting from "./pages/setting";
 import Delivery from "./pages/delivery";
 import "antd/dist/reset.css"; //
+import ForgotPassword from "./pages/forgotPassword";
 
 function App() {
   // eslint-disable-next-line no-unused-vars
@@ -82,6 +83,12 @@ function App() {
             <Route
               path="/"
               element={<LoginSignUp LoginValidation={LoginValidation} />}
+            />
+            <Route
+              path="/forgot-password"
+              element={
+                <ForgotPassword />
+              }
             />
             {loginData && (
               <>

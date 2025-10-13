@@ -10,7 +10,8 @@ const {
   RemoveAllCheckoutPerUser,
   AddOrSubCheckoutQty,
   GetAllOrderPerUser,
-  CreatePaymentIntent
+  CreatePaymentIntent,
+  AddOrderReview
 } = require("../controllers/Order.controller");
 
 OrderRouter.post("/api/orders", AddOrder);
@@ -33,5 +34,7 @@ OrderRouter.put("/api/user/checkout/:id/quantity", AddOrSubCheckoutQty);
 OrderRouter.get("/api/users/orders", GetAllOrderPerUser);
 
 OrderRouter.post("/api/user/create-payment-intent", CreatePaymentIntent);
+
+OrderRouter.post("/api/user/:id/review", AddOrderReview)
 
 module.exports = OrderRouter;
