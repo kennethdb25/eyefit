@@ -85,7 +85,7 @@ const AddOrder = async (req, res) => {
         color: p.color,
       })),
       paymentDetails: {
-        paymentReferenceId: paymentDetails?.id || 'N/A',
+        paymentReferenceId: paymentDetails ? paymentDetails?.id : 'N/A',
         paymentType: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "Cash on Delivery",
         amount: totalAmount
       },
