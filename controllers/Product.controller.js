@@ -57,7 +57,7 @@ const AddProduct = async (req, res) => {
 
         return {
           color: variant.color,
-          images: uploadedImage ? [] : [], // enforce array with max 1
+          images: uploadedImage ? [uploadedImage] : [], // enforce array with max 1
         };
       })
     );
