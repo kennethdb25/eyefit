@@ -1,9 +1,17 @@
 const mongoose = require("mongoose");
 
 const AppointmentSchema = new mongoose.Schema({
-  customerName: {
+  customerFirstName: {
     type: String,
-    required: [true, "Please provide a customer name for the appointment"],
+    required: [true, "Please provide a customer first name for the appointment"],
+  },
+  customerMiddleName: {
+    type: String,
+    required: [true, "Please provide a customer middle name for the appointment"],
+  },
+  customerLastName: {
+    type: String,
+    required: [true, "Please provide a customer last name for the appointment"],
   },
   address: {
     type: String,

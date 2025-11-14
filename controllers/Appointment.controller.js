@@ -48,7 +48,9 @@ const GetAvailableBusinessForAppointment = async (req, res) => {
 const AddAnAppointment = async (req, res) => {
   try {
     const {
-      name,
+      firstName,
+      middleName,
+      lastName,
       address,
       gender,
       description,
@@ -60,7 +62,9 @@ const AddAnAppointment = async (req, res) => {
     } = req.body;
 
     const appointment = new AppointmentModel({
-      customerName: name.toUpperCase(),
+      customerFirstName: firstName.toUpperCase(),
+      customerMiddleName: middleName.toUpperCase(),
+      customerLastName: lastName.toUpperCase(),
       address: address.toUpperCase(),
       gender: gender.toUpperCase(),
       contact: `+63${phone}`,

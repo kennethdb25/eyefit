@@ -89,10 +89,10 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
           className="sidebar-list-item"
           hidden={loginData.body.userType === "ADMIN USER" ? true : false}
           onClick={() => {
-            onNavigate("/inventory");
+            onNavigate("/transactions");
           }}
         >
-          <BsListCheck className="icon" /> Inventory
+          <BsListCheck className="icon" /> Transactions
         </li>
         <li
           className="sidebar-list-item"

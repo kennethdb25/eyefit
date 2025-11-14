@@ -173,7 +173,7 @@ function App() {
             {loginData && (
               <>
                 <Route
-                  path="/inventory"
+                  path="/transactions"
                   element={
                     <DashboardLayout
                       OpenSidebar={OpenSidebar}

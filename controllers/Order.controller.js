@@ -7,11 +7,21 @@ const DeliveryModel = require("../models/DeliverModel");
 const NotificationModel = require("../models/NotificationModel");
 const CheckOutModel = require("../models/CheckoutModel");
 
+function generate16DigitNumber() {
+  let number = '';
+  for (let i = 0; i < 16; i++) {
+    number += Math.floor(Math.random() * 10);
+  }
+  return number;
+}
+
 // ---------------------------
 // ADD ORDER
 // ---------------------------
 const AddOrder = async (req, res) => {
   const { userId, products, paymentMethod, paymentDetails } = req.body;
+  console.log(paymentMethod)
+  console.log(paymentDetails)
   try {
     // ✅ validate user in one call
     const user = await UserModel.findById(userId);
@@ -85,11 +95,11 @@ const AddOrder = async (req, res) => {
         color: p.color,
       })),
       paymentDetails: {
-        paymentReferenceId: paymentDetails ? paymentDetails?.id : 'N/A',
-        paymentType: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "Cash on Delivery",
+        paymentReferenceId: paymentDetails ? paymentDetails?.id : paymentMethod === "gcash" ? generate16DigitNumber() : 'N/A',
+        paymentType: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "gcash" ? "Gcash" : "Cash on Delivery",
         amount: totalAmount
       },
-      paymentMethod: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "Cash on Delivery",
+      paymentMethod: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "gcash" ? "Gcash" : "Cash on Delivery",
       company: previousCompany,
       total: totalAmount,
     });
@@ -249,6 +259,20 @@ const GetAllCheckoutPerUser = async (req, res) => {
   }
 };
 
+const UpdateCheckoutItem = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { color } = req.body;
+    console.log(id);
+    console.log(color)
+    const checkoutItem = await CheckOutModel.findByIdAndUpdate(id, { color }, { new: true });
+
+    res.status(200).json({ success: true, data: checkoutItem });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+}
+
 const RemoveCheckout = async (req, res) => {
   try {
     const id = req.query.checkoutId || "";
@@ -402,6 +426,7 @@ module.exports = {
   UpdateOrderStatus,
   AddCheckOut,
   GetAllCheckoutPerUser,
+  UpdateCheckoutItem,
   RemoveCheckout,
   RemoveAllCheckoutPerUser,
   AddOrSubCheckoutQty,

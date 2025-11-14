@@ -6,6 +6,7 @@ const {
   UpdateOrderStatus,
   AddCheckOut,
   GetAllCheckoutPerUser,
+  UpdateCheckoutItem,
   RemoveCheckout,
   RemoveAllCheckoutPerUser,
   AddOrSubCheckoutQty,
@@ -26,6 +27,8 @@ OrderRouter.post("/api/user/checkout", AddCheckOut);
 OrderRouter.get("/api/user/get-checkout", GetAllCheckoutPerUser);
 
 OrderRouter.delete("/api/user/remove/checkout", RemoveCheckout)
+
+OrderRouter.put("/api/user/update/checkout/:id", UpdateCheckoutItem)
 
 OrderRouter.delete("/api/user/remove/all/checkout", RemoveAllCheckoutPerUser)
 
