@@ -85,6 +85,12 @@ const AddOrder = async (req, res) => {
     if (statusOps.length > 0) {
       await ProductModel.bulkWrite(statusOps);
     }
+    const labels = {
+      otc: "Over the counter",
+      card: "Debit/Credit Card",
+      gcash: "Gcash",
+      cod: "Cash on Delivery",
+    };
 
     // create order
     const newOrder = new OrderModel({
@@ -96,10 +102,10 @@ const AddOrder = async (req, res) => {
       })),
       paymentDetails: {
         paymentReferenceId: paymentDetails ? paymentDetails?.id : paymentMethod === "gcash" ? generate16DigitNumber() : 'N/A',
-        paymentType: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "gcash" ? "Gcash" : "Cash on Delivery",
+        paymentType: labels[paymentMethod] || "Cash on Delivery",
         amount: totalAmount
       },
-      paymentMethod: paymentMethod === "otc" ? "Over the counter" : "card" ? "Debit/Credit Card" : "gcash" ? "Gcash" : "Cash on Delivery",
+      paymentMethod: labels[paymentMethod] || "Cash on Delivery",
       company: previousCompany,
       total: totalAmount,
     });
