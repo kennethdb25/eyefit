@@ -42,6 +42,7 @@ const Appointments = () => {
         `/api/appointments?company=${loginData?.body?.company}`
       );
       const json = await res.json();
+      console.log(json.body);
       setData(json.body || []); // assuming your API responds with { body: [...] }
     } catch (error) {
       console.error("Fetch failed:", error);
@@ -184,11 +185,28 @@ const Appointments = () => {
   });
 
   const columns = [
+    // PROBLEMATIC recheck data path
+    //     customerFirstName
+    // :
+    // "KENNETH"
+    // customerLastName
+    // :
+    // "BAUTISTA"
+    // customerMiddleName
+    // :
+    // "DIZON"
     {
-      title: "Customer Name",
-      dataIndex: "customerName",
-      key: "customerName",
-      ...getColumnSearchProps("customerName"),
+      title: "First Name",
+      dataIndex: "customerFirstName",
+      key: "customerFirstName",
+      ...getColumnSearchProps("customerFirstName"),
+      className: "blue-text",
+    },
+    {
+      title: "Last Name",
+      dataIndex: "customerLastName",
+      key: "customerLastName",
+      ...getColumnSearchProps("customerLastName"),
       className: "blue-text",
     },
     {
@@ -200,11 +218,6 @@ const Appointments = () => {
       title: "Gender",
       dataIndex: "gender",
       key: "gender",
-    },
-    {
-      title: "Age",
-      dataIndex: "age",
-      key: "age",
     },
     {
       title: "Order",

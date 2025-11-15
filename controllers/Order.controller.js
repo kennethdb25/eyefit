@@ -146,7 +146,7 @@ const AddOrder = async (req, res) => {
 const GetAllOrderPerCompany = async (req, res) => {
   try {
     const company = req.query.company || "";
-    const allOrder = await OrderModel.find({ company })
+    const allOrder = await OrderModel.find({ company, status: { $ne: 'Completed' } }).sort({ createdAt: -1 })
       .populate("user")
       .populate("products.product");
     return res.status(200).json({ success: true, body: allOrder });

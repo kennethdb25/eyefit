@@ -1,5 +1,6 @@
 const AccountModel = require("../models/AccountModel");
 const cipher = require("bcryptjs");
+const UserModel = require("../models/UserModel");
 
 const AccountLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -141,7 +142,43 @@ const EditAccount = async (req, res) => {
   }
 };
 
-const AccountLoginHistory = async (req, res) => { };
+const AccountResetPassword = async (req, res) => {
+  try {
+    const id = req.params.userId;
+
+    const getUser = await UserModel.findOne({ _id: id });
+
+    if (!getUser) {
+      return res.status(404).json({ success: false, message: "Email not found" });
+    }
+
+    const isMatch = await cipher.compare(req.body.currentPassword, getUser.password);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: "Current password is incorrect",
+      });
+    }
+
+    if (req.body.confirmPassword !== req.body.newPassword) {
+      return res.status(400).json({ success: false, message: "Passwords do not match" });
+    }
+
+    const password = await cipher.hash(req.body.newPassword, 12);
+
+
+    await getUser.updateOne({
+      password: password
+    });
+
+    return res
+      .status(200)
+      .json({ success: true, body: "Change Password Successfully" });
+  } catch (error) {
+    return res.status(404).json(error);
+  }
+};
 
 module.exports = {
   AccountSignup,
@@ -150,4 +187,5 @@ module.exports = {
   AccountLogout,
   GetAllAccountUser,
   EditAccount,
+  AccountResetPassword
 };

@@ -75,7 +75,7 @@ const Delivery = () => {
       dataIndex: "shippedOutDate",
       key: "shippedOutDate",
       render: (_, { shippedOutDate }) => {
-        return moment(shippedOutDate).format("LL");
+        return moment(shippedOutDate).format("LLL");
       },
     },
     // {

@@ -228,7 +228,7 @@ const Orders = () => {
       dataIndex: "createdAt",
       key: "createdAt",
       render: (_, { createdAt }) => {
-        return moment(createdAt).format("LL");
+        return moment(createdAt).format("LLL");
       },
     },
     // {
@@ -256,10 +256,6 @@ const Orders = () => {
         </>
       ),
       filters: [
-        {
-          text: "Completed",
-          value: "Completed",
-        },
         {
           text: "Shipped",
           value: "Shipped",
@@ -436,9 +432,6 @@ const Orders = () => {
     (item) => item.status === "Processing"
   ).length;
   const shippedCount = data.filter((item) => item.status === "Shipped").length;
-  const completedCount = data.filter(
-    (item) => item.status === "Completed"
-  ).length;
 
   useEffect(() => {
     fetchData();
@@ -470,10 +463,6 @@ const Orders = () => {
             <div className="status-card shipped">
               <FaTruck className="status-icon" />
               <strong>Shipped: {shippedCount}</strong>
-            </div>
-            <div className="status-card completed">
-              <FaCheckCircle className="status-icon" />
-              <strong>Completed: {completedCount}</strong>
             </div>
           </div>
           <div className="action-buttons">

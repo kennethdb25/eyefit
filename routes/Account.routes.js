@@ -8,7 +8,8 @@ const {
   AccountValidate,
   AccountLogout,
   GetAllAccountUser,
-  EditAccount
+  EditAccount,
+  AccountResetPassword
 } = require("../controllers/Account.controller");
 const { ValidateAccount } = require("../middlewares/Authenticate");
 
@@ -30,10 +31,10 @@ AccountRouter.post("/api/user/registration", AccountSignup);
 //   "/api/user/forgot-password/:email",
 //   ForgotPasswordVerifyEmail
 // );
-// AccountRouter.patch(
-//   "/api/user/forgot-password/:email",
-//   ForgotPasswordUpdatePassword
-// );
+AccountRouter.patch(
+  "/api/user/forgot-password/:userId",
+  AccountResetPassword
+);
 // --------------- **** -------------- //
 
 AccountRouter.get("/api/user/accounts", GetAllAccountUser);

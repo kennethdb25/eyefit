@@ -80,7 +80,7 @@ const Inventory = () => {
       dataIndex: "createdAt",
       key: "createdAt",
       render: (_, { createdAt }) => {
-        return moment(createdAt).format("LL");
+        return moment(createdAt).format("LLL");
       },
     },
     // {
@@ -273,7 +273,7 @@ const Inventory = () => {
     <main className="main-container">
       {contextHolder}
       <div className="main-title">
-        <h3>INVENTORY</h3>
+        <h3>TRANSACTIONS</h3>
       </div>
 
       <div style={{ paddingTop: "20px", fontFamily: "sans-serif" }}>
