@@ -14,14 +14,9 @@ import {
   MdCancel,
   MdPlayCircleOutline,
   MdLocalShipping,
-  MdCheckCircle,
 } from "react-icons/md";
 
 const { Title, Text } = Typography;
-
-const buttonStyle = {
-  marginRight: "10px",
-};
 
 const ViewOrderModal = (props) => {
   const { isModalOpen, setIsModalOpen, selectedOrder, handleUpdateStatus } =
@@ -84,20 +79,6 @@ const ViewOrderModal = (props) => {
             icon={<MdLocalShipping />}
           >
             Shipped
-          </Button>,
-
-          <Button
-            key="complete"
-            hidden={
-              selectedOrder?.status === "Pending" ||
-              selectedOrder?.status === "Cancelled" ||
-              selectedOrder?.status === "Completed"
-            }
-            onClick={() => handleUpdateStatus("Completed", selectedOrder?._id)}
-            className="modal-btn complete-btn"
-            icon={<MdCheckCircle />}
-          >
-            Complete
           </Button>,
         ]}
         width={900}
