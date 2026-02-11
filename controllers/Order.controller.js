@@ -6,7 +6,6 @@ const InventoryModel = require("../models/InventoryModel");
 const DeliveryModel = require("../models/DeliverModel");
 const NotificationModel = require("../models/NotificationModel");
 const CheckOutModel = require("../models/CheckoutModel");
-
 function generate16DigitNumber() {
   let number = '';
   for (let i = 0; i < 16; i++) {
@@ -14,6 +13,8 @@ function generate16DigitNumber() {
   }
   return number;
 }
+
+
 
 // ---------------------------
 // ADD ORDER
@@ -86,7 +87,6 @@ const AddOrder = async (req, res) => {
       await ProductModel.bulkWrite(statusOps);
     }
     const labels = {
-      otc: "Over the counter",
       card: "Debit/Credit Card",
       gcash: "Gcash",
       cod: "Cash on Delivery",
