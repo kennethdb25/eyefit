@@ -4,6 +4,10 @@ const ProductModel = require("../models/ProductModel");
 const UserModel = require("../models/UserModel");
 const cipher = require("bcryptjs");
 const ViewModel = require("../models/ViewModel");
+const jwt = require("jsonwebtoken");
+const { cookieKey, baseUrl } = require("../config/keys")
+const mailer = require("../utils/mailer");
+
 
 // ---------------------- ACCOUNT ----------------------
 
@@ -69,22 +73,205 @@ const AddUser = async (req, res) => {
       return res.status(422).json({ error: "Account Already Exists" });
     }
 
+    const token = jwt.sign({ email }, cookieKey, {
+      expiresIn: "1d",
+    });
+
+
     const savedUser = await UserModel.create({
       name: name.toUpperCase(),
       email,
       contact: `+63${contact}`,
       userType: "USER",
-      acctStatus: "ACTIVE",
+      acctStatus: "INACTIVE",
       address: address.toUpperCase(),
       gender: gender.toUpperCase(),
       password,
+      verificationToken: token,
+    });
+
+    const link = `${baseUrl}/api/auth/verify/${token}`;
+
+    await mailer.sendMail({
+      from: `"Verify Account" - Eyefit Store`,
+      to: email,
+      subject: "Verify your account",
+      html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Verify Your Email</title>
+</head>
+<body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6;padding:30px 0;">
+    <tr>
+      <td align="center">
+        <table width="100%" max-width="480" cellpadding="0" cellspacing="0" style="background:white;border-radius:10px;box-shadow:0 10px 25px rgba(0,0,0,0.15);overflow:hidden;">
+          <tr>
+            <td style="background:linear-gradient(135deg,#2563eb,#4f46e5);padding:20px;text-align:center;color:white;">
+              <h2 style="margin:0;">Welcome, ${name} 👋</h2>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:30px;text-align:center;">
+              <p style="color:#374151;font-size:15px;line-height:1.6;">
+                Thanks for registering! Please confirm your email address to activate your account.
+              </p>
+
+              <a href="${link}"
+                 style="display:inline-block;margin:20px 0;padding:14px 28px;
+                        background:#2563eb;color:white;font-weight:bold;
+                        border-radius:6px;text-decoration:none;">
+                Verify My Email
+              </a>
+
+              <p style="font-size:13px;color:#6b7280;">
+                This link will expire in 24 hours.
+              </p>
+
+              <p style="font-size:12px;color:#9ca3af;margin-top:20px;">
+                If you did not create this account, please ignore this email.
+              </p>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="background:#f9fafb;padding:15px;text-align:center;font-size:11px;color:#9ca3af;">
+              © ${new Date().getFullYear()} Eyefit Store. All rights reserved.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+`
+      ,
     });
 
     res.status(201).json({ success: true, body: savedUser });
   } catch (error) {
+    console.log(error)
     res.status(500).json({ message: "Server error" });
   }
 };
+
+const VerifyUser = async (req, res) => {
+  try {
+    const decoded = jwt.verify(req.params.token, cookieKey);
+
+    const user = await UserModel.findOne({
+      email: decoded.email,
+      verificationToken: req.params.token,
+    });
+
+    if (!user) return res.status(400).send("Invalid or expired link.");
+
+    user.acctStatus = "ACTIVE";
+    user.verificationToken = null;
+
+    await user.save();
+
+    res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Email Verified</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card {
+      background: white;
+      padding: 40px;
+      border-radius: 12px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+      animation: pop 0.6s ease;
+    }
+
+    .check {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: #22c55e;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      color: white;
+      font-size: 36px;
+    }
+
+    h2 {
+      margin-bottom: 10px;
+      color: #111827;
+    }
+
+    p {
+      color: #6b7280;
+      margin-bottom: 25px;
+    }
+
+    a {
+      display: inline-block;
+      padding: 12px 25px;
+      background: #2563eb;
+      color: white;
+      border-radius: 6px;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    a:hover {
+      background: #1d4ed8;
+    }
+
+    @keyframes pop {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="check">✓</div>
+    <h2>Email Verified!</h2>
+    <p>Your account is now active. You can safely log in.</p>
+  </div>
+</body>
+</html>
+`);
+
+
+  } catch (err) {
+    console.log(err)
+    res.status(400).send("Verification link expired or invalid.");
+  }
+}
 
 const UpdateUserAddress = async (req, res) => {
   try {
@@ -203,6 +390,7 @@ module.exports = {
   AccountLogin,
   AccountUserValidate,
   AddUser,
+  VerifyUser,
   UpdateUserAddress,
   LikeProduct,
   GetAllLikeProductPerUser,

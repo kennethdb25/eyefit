@@ -4,6 +4,7 @@ const {
     AccountLogin,
     AccountUserValidate,
     AddUser,
+    VerifyUser,
     UpdateUserAddress,
     LikeProduct,
     GetAllLikeProductPerUser,
@@ -14,6 +15,8 @@ const {
 const { ValidateUserAccount } = require("../middlewares/Authenticate");
 
 UserRouter.post("/api/users", AddUser);
+
+UserRouter.get("/api/auth/verify/:token", VerifyUser);
 
 UserRouter.put("/api/users/address/:id", UpdateUserAddress);
 

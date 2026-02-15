@@ -9,4 +9,7 @@ module.exports = {
   apiKey: "724226155627925",
   apiSecret: "-5HGFP0rHL5mGlcbFEUXs45NGlY",
   paymongoSecretKey: "sk_test_WP1FKzGNZwVitiwi53116N7X",
+  email: "eyefitofficial20@gmail.com",
+  emailPass: "exsnnumwjwminupn",
+  baseUrl: "http://localhost:5000"
 };
