@@ -46,7 +46,8 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
             onNavigate("/home");
           }}
         >
-          <BsGrid1X2Fill className="icon" /> Dashboard
+          <BsGrid1X2Fill className="icon" />{" "}
+          {loginData.body.userType === "ADMIN USER" ? "Setting" : "Dashboard"}
         </li>
         <li
           className="sidebar-list-item"
@@ -96,7 +97,7 @@ function Sidebar({ openSidebarToggle, OpenSidebar }) {
         </li>
         <li
           className="sidebar-list-item"
-          hidden={loginData.body.userType !== "ADMIN USER" ? true : false}
+          hidden={true}
           onClick={() => {
             onNavigate("/setting");
           }}

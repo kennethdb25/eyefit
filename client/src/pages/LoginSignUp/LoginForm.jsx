@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Form, Input, Row, Col, Button, Typography } from "antd";
+import { Form, Input, Button, Typography } from "antd";
 import { ToastContainer, toast, Bounce } from "react-toastify";
 import {
   UserOutlined,
@@ -10,8 +10,6 @@ import {
 } from "@ant-design/icons";
 import { Box, Link } from "@mui/material";
 import useStyles from "./style";
-
-const { Title } = Typography;
 
 const LoginForm = (props) => {
   const classes = useStyles();

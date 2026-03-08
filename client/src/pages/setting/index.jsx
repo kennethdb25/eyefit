@@ -153,13 +153,13 @@ const Setting = () => {
   ];
 
   const activeCount = data.filter(
-    (item) => item.acctStatus === "ACTIVE"
+    (item) => item.acctStatus === "ACTIVE",
   ).length;
   const suspendedCount = data.filter(
-    (item) => item.acctStatus === "SUSPENDED"
+    (item) => item.acctStatus === "SUSPENDED",
   ).length;
   const blockedCount = data.filter(
-    (item) => item.acctStatus === "BLOCKED"
+    (item) => item.acctStatus === "BLOCKED",
   ).length;
 
   const onConfirm = () => {
